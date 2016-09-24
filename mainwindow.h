@@ -18,7 +18,6 @@ public:
     Window(QWidget *parent = 0);
 
 private slots:
-    void browse();
     void find();
     void openFileOfItem(int row, int column);
 
@@ -28,14 +27,8 @@ private:
     QComboBox *createComboBox(const QString &text = QString());
     void createFilesTable();
 
-    QComboBox *fileComboBox;
     QComboBox *textComboBox;
-    QComboBox *directoryComboBox;
-    QLabel *fileLabel;
     QLabel *textLabel;
-    QLabel *directoryLabel;
-    QLabel *filesFoundLabel;
-    QPushButton *browseButton;
     QPushButton *findButton;
     QTableWidget *filesTable;
 

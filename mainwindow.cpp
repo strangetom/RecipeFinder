@@ -1,52 +1,26 @@
 #include <QtWidgets>
 #include "mainwindow.h"
+#include <QKeyEvent>
 
 Window::Window(QWidget *parent)
     : QWidget(parent)
 {
-    browseButton = new QPushButton(tr("&Browse..."), this);
-    connect(browseButton, &QAbstractButton::clicked, this, &Window::browse);
+    textComboBox = createComboBox();
     findButton = new QPushButton(tr("&Find"), this);
     connect(findButton, &QAbstractButton::clicked, this, &Window::find);
-
-    fileComboBox = createComboBox(tr("*"));
-    textComboBox = createComboBox();
-    directoryComboBox = createComboBox(QDir::currentPath());
-
-    fileLabel = new QLabel(tr("Named:"));
-    textLabel = new QLabel(tr("Containing text:"));
-    directoryLabel = new QLabel(tr("In directory:"));
-    filesFoundLabel = new QLabel;
+    textLabel = new QLabel(tr("Search:"));
 
     createFilesTable();
 
     QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->addWidget(fileLabel, 0, 0);
-    mainLayout->addWidget(fileComboBox, 0, 1, 1, 2);
-    mainLayout->addWidget(textLabel, 1, 0);
-    mainLayout->addWidget(textComboBox, 1, 1, 1, 2);
-    mainLayout->addWidget(directoryLabel, 2, 0);
-    mainLayout->addWidget(directoryComboBox, 2, 1);
-    mainLayout->addWidget(browseButton, 2, 2);
-    mainLayout->addWidget(filesTable, 3, 0, 1, 3);
-    mainLayout->addWidget(filesFoundLabel, 4, 0, 1, 2);
-    mainLayout->addWidget(findButton, 4, 2);
+    mainLayout->addWidget(textLabel, 0, 0);
+    mainLayout->addWidget(textComboBox, 0, 1, 1, 1);
+    mainLayout ->addWidget(findButton, 0, 3);
+    mainLayout->addWidget(filesTable, 1, 0, 1, 4);
     setLayout(mainLayout);
 
-    setWindowTitle(tr("Find Files"));
-    resize(700, 300);
-}
-
-void Window::browse()
-{
-    QString directory = QFileDialog::getExistingDirectory(this,
-                               tr("Find Files"), QDir::currentPath());
-
-    if (!directory.isEmpty()) {
-        if (directoryComboBox->findText(directory) == -1)
-            directoryComboBox->addItem(directory);
-        directoryComboBox->setCurrentIndex(directoryComboBox->findText(directory));
-    }
+    setWindowTitle(tr("Find Recipes"));
+    resize(500, 300);
 }
 
 static void updateComboBox(QComboBox *comboBox)
@@ -59,18 +33,12 @@ void Window::find()
 {
     filesTable->setRowCount(0);
 
-    QString fileName = fileComboBox->currentText();
     QString text = textComboBox->currentText();
-    QString path = directoryComboBox->currentText();
-
-    updateComboBox(fileComboBox);
     updateComboBox(textComboBox);
-    updateComboBox(directoryComboBox);
 
-    currentDir = QDir(path);
+    currentDir = QDir(".");
     QStringList files;
-    if (fileName.isEmpty())
-        fileName = "*";
+    QString fileName = "*";
     files = currentDir.entryList(QStringList(fileName),
                                  QDir::Files | QDir::NoSymLinks);
 
@@ -134,9 +102,6 @@ void Window::showFiles(const QStringList &files)
         filesTable->setItem(row, 0, fileNameItem);
         filesTable->setItem(row, 1, sizeItem);
     }
-    filesFoundLabel->setText(tr("%1 file(s) found").arg(files.size()) +
-                             (" (Double click on a file to open it)"));
-    filesFoundLabel->setWordWrap(true);
 }
 
 QComboBox *Window::createComboBox(const QString &text)
