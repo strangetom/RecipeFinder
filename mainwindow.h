@@ -3,12 +3,25 @@
 
 #include <QWidget>
 #include <QDir>
+#include <QComboBox>
 
-class QComboBox;
 class QLabel;
 class QPushButton;
 class QTableWidget;
 class QTableWidgetItem;
+
+
+class QComboBoxMod : public QComboBox
+{
+     Q_OBJECT
+public:
+    // Inherit constructor from base class
+    using QComboBox::QComboBox;
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
+};
+
 
 class Window : public QWidget
 {
@@ -24,10 +37,10 @@ private slots:
 private:
     QStringList findFiles(const QStringList &files, const QString &text);
     void showFiles(const QStringList &files);
-    QComboBox *createComboBox(const QString &text = QString());
+    QComboBoxMod *createComboBox(const QString &text = QString());
     void createFilesTable();
 
-    QComboBox *textComboBox;
+    QComboBoxMod *textComboBox;
     QLabel *textLabel;
     QPushButton *findButton;
     QTableWidget *filesTable;

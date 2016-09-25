@@ -23,7 +23,13 @@ Window::Window(QWidget *parent)
     resize(500, 300);
 }
 
-static void updateComboBox(QComboBox *comboBox)
+void QComboBoxMod::keyPressEvent(QKeyEvent *e)
+{
+    qDebug() << e->key();
+}
+
+
+static void updateComboBox(QComboBoxMod *comboBox)
 {
     if (comboBox->findText(comboBox->currentText()) == -1)
         comboBox->addItem(comboBox->currentText());
@@ -104,9 +110,9 @@ void Window::showFiles(const QStringList &files)
     }
 }
 
-QComboBox *Window::createComboBox(const QString &text)
+QComboBoxMod *Window::createComboBox(const QString &text)
 {
-    QComboBox *comboBox = new QComboBox;
+    QComboBoxMod *comboBox = new QComboBoxMod;
     comboBox->setEditable(true);
     comboBox->addItem(text);
     comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
