@@ -2,19 +2,18 @@
 #include "mainwindow.h"
 #include <QKeyEvent>
 
-Window::Window(QWidget *parent)
-    : QWidget(parent)
+Window::Window(QWidget *parent) : QWidget(parent)
 {
-    textComboBox = createComboBox();
     findButton = new QPushButton(tr("&Find"), this);
     connect(findButton, &QAbstractButton::clicked, this, &Window::find);
     textLabel = new QLabel(tr("Search:"));
+    searchBox = new SearchBox();
 
     createFilesTable();
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(textLabel, 0, 0);
-    mainLayout->addWidget(textComboBox, 0, 1, 1, 1);
+    mainLayout->addWidget(searchBox, 0, 1, 1, 1);
     mainLayout ->addWidget(findButton, 0, 3);
     mainLayout->addWidget(filesTable, 1, 0, 1, 4);
     setLayout(mainLayout);
@@ -23,24 +22,11 @@ Window::Window(QWidget *parent)
     resize(500, 300);
 }
 
-void QComboBoxMod::keyPressEvent(QKeyEvent *e)
-{
-    qDebug() << e->key();
-}
-
-
-static void updateComboBox(QComboBoxMod *comboBox)
-{
-    if (comboBox->findText(comboBox->currentText()) == -1)
-        comboBox->addItem(comboBox->currentText());
-}
-
 void Window::find()
 {
     filesTable->setRowCount(0);
 
-    QString text = textComboBox->currentText();
-    updateComboBox(textComboBox);
+    QString text = searchBox->text();
 
     currentDir = QDir(".");
     QStringList files;
@@ -108,15 +94,6 @@ void Window::showFiles(const QStringList &files)
         filesTable->setItem(row, 0, fileNameItem);
         filesTable->setItem(row, 1, sizeItem);
     }
-}
-
-QComboBoxMod *Window::createComboBox(const QString &text)
-{
-    QComboBoxMod *comboBox = new QComboBoxMod;
-    comboBox->setEditable(true);
-    comboBox->addItem(text);
-    comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    return comboBox;
 }
 
 void Window::createFilesTable()

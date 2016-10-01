@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QDir>
-#include <QComboBox>
+#include <QLineEdit>
 
 class QLabel;
 class QPushButton;
@@ -11,15 +11,15 @@ class QTableWidget;
 class QTableWidgetItem;
 
 
-class QComboBoxMod : public QComboBox
+class SearchBox: public QLineEdit
 {
-     Q_OBJECT
-public:
-    // Inherit constructor from base class
-    using QComboBox::QComboBox;
+    Q_OBJECT
 
-protected:
-    void keyPressEvent(QKeyEvent *e);
+public:
+    using QLineEdit::QLineEdit;
+
+protected slots:
+    //void doSearch();
 };
 
 
@@ -37,15 +37,15 @@ private slots:
 private:
     QStringList findFiles(const QStringList &files, const QString &text);
     void showFiles(const QStringList &files);
-    QComboBoxMod *createComboBox(const QString &text = QString());
     void createFilesTable();
 
-    QComboBoxMod *textComboBox;
+    SearchBox *searchBox;
     QLabel *textLabel;
     QPushButton *findButton;
     QTableWidget *filesTable;
 
     QDir currentDir;
+
 };
 
 #endif
