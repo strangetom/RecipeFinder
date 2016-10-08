@@ -9,5 +9,5 @@ The are a number of aims of this project.
 The fuzzy search is implemented using ```lib_fts``` from [forrestthewoods](https://github.com/forrestthewoods/lib_fts) on Github.
 
 ### To-do list
-1. Use ranked fuzzy matching instead of the basic one currently implemented. Maybe store the match and it's rank in an ordered map?  
+1. Need to handle the event where more than one result has the same rank.  
 2. Application icon and launcher for Ubuntu.  
