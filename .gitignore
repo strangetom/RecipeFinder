@@ -30,3 +30,5 @@
 
 # Other files
 pat.txt
+*.pro
+*.pro.user
