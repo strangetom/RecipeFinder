@@ -28,7 +28,7 @@ namespace fts {
     // Returns true if each character in pattern is found sequentially within str
     // iff found then outScore is also set. Score value has no intrinsic meaning. Range varies with pattern. 
     // Can only compare scores with same search pattern.
-    static bool fuzzy_match(char const * pattern, char const * str, int & outScore) 
+    static bool fuzzy_match_score(char const * pattern, char const * str, int & outScore) 
     {
         // Score consts
         const int adjacency_bonus = 5;              // bonus for adjacent matches
