@@ -1,17 +1,15 @@
 #include <QtWidgets>
 #include "mainwindow.h"
-#include <QKeyEvent>
-#include <QDebug>
-
 #include <fts_fuzzy_match.h>
 #include <glob.h>
 #include <string>
+#include <map>
 
 Window::Window(QWidget *parent) : QWidget(parent)
 {
     textLabel = new QLabel(tr("Search:"));
     searchBox = new SearchBox();
-    connect(searchBox, SIGNAL(updateMatches(QStringList)), this, SLOT(showFiles(QStringList)));
+    connect(searchBox, SIGNAL(updateMatches(std::map<int, QString>)), this, SLOT(showFiles(std::map<int, QString>)));
 
     createFilesTable();
 
@@ -41,45 +39,44 @@ void SearchBox::keyPressEvent(QKeyEvent *evt){
 
     QLineEdit::keyPressEvent(evt);
     QStringList files = globVector("*/*.md");
+    std::map<int, QString> matches;
     if (!text().isEmpty()){
-        files = findFiles(files, text());
+        matches = findFiles(files, text());
     }
-    emit updateMatches(files);
+    emit updateMatches(matches);
 }
 
-QStringList SearchBox::findFiles(const QStringList &files, const QString &text)
+std::map<int, QString> SearchBox::findFiles(const QStringList &files, const QString &text)
 {
-    QStringList matchingFiles;
+    std::map<int, QString> matchingFiles;
 
     std::string txtstr = text.toStdString();
     for (int i=0; i<files.size(); ++i){
+        int score;
         std::string filestr = files[i].toStdString();
-        if (fts::fuzzy_match(txtstr.c_str(), filestr.c_str())){
-            matchingFiles << files[i];
+        if (fts::fuzzy_match_score(txtstr.c_str(), filestr.c_str(), score)){
+            matchingFiles[score] = files[i];
         }
     }
     return matchingFiles;
 }
 
-void Window::showFiles(const QStringList &files)
+
+void Window::showFiles(const std::map<int, QString> &files)
 {
     filesTable->setRowCount(0);
 
-    for (int i = 0; i < files.size(); ++i) {
-        QFile file(currentDir.absoluteFilePath(files[i]));
-        qint64 size = QFileInfo(file).size();
-
-        QTableWidgetItem *fileNameItem = new QTableWidgetItem(files[i]);
+    for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
+        QTableWidgetItem *fileNameItem = new QTableWidgetItem(iter->second);
         fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
-        QTableWidgetItem *sizeItem = new QTableWidgetItem(tr("%1 KB")
-                                             .arg(int((size + 1023) / 1024)));
-        sizeItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
-        sizeItem->setFlags(sizeItem->flags() ^ Qt::ItemIsEditable);
+        QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(iter->first) ));
+        rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+        fileNameItem->setFlags(rankItem->flags() ^ Qt::ItemIsEditable);
 
         int row = filesTable->rowCount();
         filesTable->insertRow(row);
         filesTable->setItem(row, 0, fileNameItem);
-        filesTable->setItem(row, 1, sizeItem);
+        filesTable->setItem(row, 1, rankItem);
     }
 }
 
@@ -89,7 +86,7 @@ void Window::createFilesTable()
     filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     QStringList labels;
-    labels << tr("Filename") << tr("Size");
+    labels << tr("Recipe") << tr("Rank");
     filesTable->setHorizontalHeaderLabels(labels);
     filesTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     filesTable->verticalHeader()->hide();

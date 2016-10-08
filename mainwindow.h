@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QDir>
 #include <QLineEdit>
+#include <map>
 
 class QLabel;
 class QPushButton;
@@ -19,11 +20,11 @@ public:
     using QLineEdit::QLineEdit;
 
 private:
-    QStringList findFiles(const QStringList &files, const QString &text);
+    std::map<int, QString> findFiles(const QStringList &files, const QString &text);
     void keyPressEvent(QKeyEvent *e);
 
 signals:
-    void updateMatches(QStringList matchedFiles);
+    void updateMatches(std::map<int, QString> matchedFiles);
 };
 
 
@@ -36,14 +37,13 @@ public:
 
 private slots:
     void openFileOfItem(int row, int column);
-    void showFiles(const QStringList &files);
+    void showFiles(const std::map<int, QString> &files);
 
 private:
     void createFilesTable();
 
     SearchBox *searchBox;
     QLabel *textLabel;
-    //QPushButton *findButton;
     QTableWidget *filesTable;
     QDir currentDir;
 
