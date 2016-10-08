@@ -45,66 +45,24 @@ void Window::find()
 
     QStringList files = globVector("*/*.md");
     QString text = searchBox->text();
-    if(!text.isEmpty()){
+    if (!text.isEmpty()){
         files = findFiles(files, text);
     }
     showFiles(files);
 }
-
-/*
-void Window::find()
-{
-    filesTable->setRowCount(0);
-
-    QString text = searchBox->text();
-
-    currentDir = QDir(".");
-    QStringList files;
-    QString fileName = "*";
-    files = currentDir.entryList(QStringList(fileName),
-                                 QDir::Files | QDir::NoSymLinks);
-
-    if (!text.isEmpty())
-        files = findFiles(files, text);
-    showFiles(files);
-}
-*/
 
 QStringList Window::findFiles(const QStringList &files, const QString &text)
 {
-    QProgressDialog progressDialog(this);
-    progressDialog.setCancelButtonText(tr("&Cancel"));
-    progressDialog.setRange(0, files.size());
-    progressDialog.setWindowTitle(tr("Find Files"));
+    QStringList matchingFiles;
 
-    QStringList foundFiles;
-
-    for (int i = 0; i < files.size(); ++i) {
-        progressDialog.setValue(i);
-        progressDialog.setLabelText(tr("Searching file number %1 of %2...")
-                                    .arg(i).arg(files.size()));
-        qApp->processEvents();
-
-        if (progressDialog.wasCanceled())
-            break;
-
-        QFile file(currentDir.absoluteFilePath(files[i]));
-
-        if (file.open(QIODevice::ReadOnly)) {
-            QString line;
-            QTextStream in(&file);
-            while (!in.atEnd()) {
-                if (progressDialog.wasCanceled())
-                    break;
-                line = in.readLine();
-                if (line.contains(text)) {
-                    foundFiles << files[i];
-                    break;
-                }
-            }
+    std::string txtstr = text.toStdString();
+    for (int i=0; i<files.size(); ++i){
+        std::string filestr = files[i].toStdString();
+        if (fts::fuzzy_match(txtstr.c_str(), filestr.c_str())){
+            matchingFiles << files[i];
         }
     }
-    return foundFiles;
+    return matchingFiles;
 }
 
 void Window::showFiles(const QStringList &files)
