@@ -1,6 +1,11 @@
 #include <QtWidgets>
 #include "mainwindow.h"
 #include <QKeyEvent>
+#include <QDebug>
+
+#include <fts_fuzzy_match.h>
+#include <glob.h>
+#include <string>
 
 Window::Window(QWidget *parent) : QWidget(parent)
 {
@@ -22,6 +27,31 @@ Window::Window(QWidget *parent) : QWidget(parent)
     resize(500, 300);
 }
 
+// Get list of files according to glob patternn
+QStringList globVector(const std::string& pattern){
+    glob_t glob_result;
+    glob(pattern.c_str(),GLOB_TILDE,NULL,&glob_result);
+    QStringList files;
+    for(unsigned int i=0; i<glob_result.gl_pathc; ++i){
+        files << QString(glob_result.gl_pathv[i]);
+    }
+    globfree(&glob_result);
+    return files;
+}
+
+void Window::find()
+{
+    filesTable->setRowCount(0);
+
+    QStringList files = globVector("*/*.md");
+    QString text = searchBox->text();
+    if(!text.isEmpty()){
+        files = findFiles(files, text);
+    }
+    showFiles(files);
+}
+
+/*
 void Window::find()
 {
     filesTable->setRowCount(0);
@@ -38,6 +68,7 @@ void Window::find()
         files = findFiles(files, text);
     showFiles(files);
 }
+*/
 
 QStringList Window::findFiles(const QStringList &files, const QString &text)
 {
