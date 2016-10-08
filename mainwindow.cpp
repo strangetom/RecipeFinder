@@ -9,17 +9,15 @@
 
 Window::Window(QWidget *parent) : QWidget(parent)
 {
-    findButton = new QPushButton(tr("&Find"), this);
-    connect(findButton, &QAbstractButton::clicked, this, &Window::find);
     textLabel = new QLabel(tr("Search:"));
     searchBox = new SearchBox();
+    connect(searchBox, SIGNAL(updateMatches(QStringList)), this, SLOT(showFiles(QStringList)));
 
     createFilesTable();
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(textLabel, 0, 0);
     mainLayout->addWidget(searchBox, 0, 1, 1, 1);
-    mainLayout ->addWidget(findButton, 0, 3);
     mainLayout->addWidget(filesTable, 1, 0, 1, 4);
     setLayout(mainLayout);
 
@@ -39,19 +37,17 @@ QStringList globVector(const std::string& pattern){
     return files;
 }
 
-void Window::find()
-{
-    filesTable->setRowCount(0);
+void SearchBox::keyPressEvent(QKeyEvent *evt){
 
+    QLineEdit::keyPressEvent(evt);
     QStringList files = globVector("*/*.md");
-    QString text = searchBox->text();
-    if (!text.isEmpty()){
-        files = findFiles(files, text);
+    if (!text().isEmpty()){
+        files = findFiles(files, text());
     }
-    showFiles(files);
+    emit updateMatches(files);
 }
 
-QStringList Window::findFiles(const QStringList &files, const QString &text)
+QStringList SearchBox::findFiles(const QStringList &files, const QString &text)
 {
     QStringList matchingFiles;
 
@@ -67,6 +63,8 @@ QStringList Window::findFiles(const QStringList &files, const QString &text)
 
 void Window::showFiles(const QStringList &files)
 {
+    filesTable->setRowCount(0);
+
     for (int i = 0; i < files.size(); ++i) {
         QFile file(currentDir.absoluteFilePath(files[i]));
         qint64 size = QFileInfo(file).size();

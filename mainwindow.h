@@ -18,8 +18,12 @@ class SearchBox: public QLineEdit
 public:
     using QLineEdit::QLineEdit;
 
-protected slots:
-    //void doSearch();
+private:
+    QStringList findFiles(const QStringList &files, const QString &text);
+    void keyPressEvent(QKeyEvent *e);
+
+signals:
+    void updateMatches(QStringList matchedFiles);
 };
 
 
@@ -31,19 +35,16 @@ public:
     Window(QWidget *parent = 0);
 
 private slots:
-    void find();
     void openFileOfItem(int row, int column);
+    void showFiles(const QStringList &files);
 
 private:
-    QStringList findFiles(const QStringList &files, const QString &text);
-    void showFiles(const QStringList &files);
     void createFilesTable();
 
     SearchBox *searchBox;
     QLabel *textLabel;
-    QPushButton *findButton;
+    //QPushButton *findButton;
     QTableWidget *filesTable;
-
     QDir currentDir;
 
 };
