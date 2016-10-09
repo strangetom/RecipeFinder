@@ -10,8 +10,8 @@ Window::Window(QWidget *parent) : QWidget(parent)
     textLabel = new QLabel(tr("Search:"));
     searchBox = new SearchBox();
     connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
-
     createFilesTable();
+    connect(searchBox, SIGNAL(returnPressed()), filesTable, SLOT(setFocus()) );
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(textLabel, 0, 0);
@@ -83,6 +83,7 @@ void Window::showFiles(const std::map<double, QString> &files)
         filesTable->setItem(row, 0, fileNameItem);
         filesTable->setItem(row, 1, rankItem);
     }
+    filesTable->selectRow(0);
 }
 
 void Window::createFilesTable()
@@ -100,7 +101,6 @@ void Window::createFilesTable()
     connect(filesTable, &QTableWidget::cellActivated,
             this, &Window::openFileOfItem);
 }
-
 
 void Window::openFileOfItem(int row, int /* column */)
 {
