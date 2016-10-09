@@ -9,5 +9,4 @@ The are a number of aims of this project.
 The fuzzy search is implemented using ```lib_fts``` from [forrestthewoods](https://github.com/forrestthewoods/lib_fts) on Github.
 
 ### To-do list
-1. Need to handle the event where more than one result has the same rank.  
-2. Application icon and launcher for Ubuntu.  
+1. Escape key to exit, from any focus
