@@ -20,11 +20,11 @@ public:
     using QLineEdit::QLineEdit;
 
 private:
-    std::map<int, QString> findFiles(const QStringList &files, const QString &text);
+    std::map<double, QString> findFiles(const QStringList &files, const QString &text);
     void keyPressEvent(QKeyEvent *e);
 
 signals:
-    void updateMatches(std::map<int, QString> matchedFiles);
+    void updateMatches(std::map<double, QString> matchedFiles);
 };
 
 
@@ -37,7 +37,7 @@ public:
 
 private slots:
     void openFileOfItem(int row, int column);
-    void showFiles(const std::map<int, QString> &files);
+    void showFiles(const std::map<double, QString> &files);
 
 private:
     void createFilesTable();

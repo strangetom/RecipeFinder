@@ -9,7 +9,7 @@ Window::Window(QWidget *parent) : QWidget(parent)
 {
     textLabel = new QLabel(tr("Search:"));
     searchBox = new SearchBox();
-    connect(searchBox, SIGNAL(updateMatches(std::map<int, QString>)), this, SLOT(showFiles(std::map<int, QString>)));
+    connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
 
     createFilesTable();
 
@@ -39,37 +39,42 @@ void SearchBox::keyPressEvent(QKeyEvent *evt){
 
     QLineEdit::keyPressEvent(evt);
     QStringList files = globVector("*/*.md");
-    std::map<int, QString> matches;
+    std::map<double, QString> matches;
     if (!text().isEmpty()){
         matches = findFiles(files, text());
     }
     emit updateMatches(matches);
 }
 
-std::map<int, QString> SearchBox::findFiles(const QStringList &files, const QString &text)
+std::map<double, QString> SearchBox::findFiles(const QStringList &files, const QString &text)
 {
-    std::map<int, QString> matchingFiles;
+    std::map<double, QString> matchingFiles;
 
     std::string txtstr = text.toStdString();
     for (int i=0; i<files.size(); ++i){
         int score;
         std::string filestr = files[i].toStdString();
         if (fts::fuzzy_match_score(txtstr.c_str(), filestr.c_str(), score)){
-            matchingFiles[score] = files[i];
+            // If a map entry already has the current score, increase score by 0.01. When dispaying, we'll round back to int.
+            double dbscore = (double)score;
+            if (matchingFiles.count(dbscore) > 0){
+                dbscore += 0.01;
+            }
+            matchingFiles[dbscore] = files[i];
         }
     }
     return matchingFiles;
 }
 
 
-void Window::showFiles(const std::map<int, QString> &files)
+void Window::showFiles(const std::map<double, QString> &files)
 {
     filesTable->setRowCount(0);
 
     for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
         QTableWidgetItem *fileNameItem = new QTableWidgetItem(iter->second);
         fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
-        QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(iter->first) ));
+        QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(round(iter->first)) ));
         rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
         fileNameItem->setFlags(rankItem->flags() ^ Qt::ItemIsEditable);
 
