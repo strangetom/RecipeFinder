@@ -11,7 +11,7 @@ Window::Window(QWidget *parent) : QWidget(parent)
     searchBox = new SearchBox();
     connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
     createFilesTable();
-    connect(searchBox, SIGNAL(returnPressed()), filesTable, SLOT(setFocus()) );
+    connect(searchBox, SIGNAL(returnPressed()), filesTable, SLOT(setFocus()));
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(textLabel, 0, 0);
@@ -72,8 +72,11 @@ void Window::showFiles(const std::map<double, QString> &files)
     filesTable->setRowCount(0);
 
     for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
-        QTableWidgetItem *fileNameItem = new QTableWidgetItem(iter->second);
+        QString path_name = iter->second;
+        QTableWidgetItem *fileNameItem = new QTableWidgetItem(path_name.split('/')[1]);
         fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
+        // Store full file path as hidden data
+        fileNameItem->setData(Qt::UserRole, path_name);
         QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(round(iter->first)) ));
         rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
         fileNameItem->setFlags(rankItem->flags() ^ Qt::ItemIsEditable);
@@ -105,6 +108,7 @@ void Window::createFilesTable()
 void Window::openFileOfItem(int row, int /* column */)
 {
     QTableWidgetItem *item = filesTable->item(row, 0);
-
-    QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(item->text())));
+    // Read hidden data to find full file path
+    QString path = item->data(Qt::UserRole).toString();
+    QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
 }
