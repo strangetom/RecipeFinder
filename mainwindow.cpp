@@ -72,7 +72,7 @@ void Window::showFiles(const std::map<double, QString> &files)
     filesTable->setRowCount(0);
 
     for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
-        QTableWidgetItem *fileNameItem = new QTableWidgetItem(iter->second);
+        QTableWidgetItem *fileNameItem = new QTableWidgetItem(iter->second.split('/')[1]);
         fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
         QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(round(iter->first)) ));
         rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
