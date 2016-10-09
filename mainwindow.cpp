@@ -13,6 +13,10 @@ Window::Window(QWidget *parent) : QWidget(parent)
     createFilesTable();
     connect(searchBox, SIGNAL(returnPressed()), filesTable, SLOT(setFocus()));
 
+    // Event filter to capture Esc key press
+    keyEscapeReceiver* key = new keyEscapeReceiver();
+    this->installEventFilter(key);
+
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(textLabel, 0, 0);
     mainLayout->addWidget(searchBox, 0, 1, 1, 1);
@@ -111,4 +115,21 @@ void Window::openFileOfItem(int row, int /* column */)
     // Read hidden data to find full file path
     QString path = item->data(Qt::UserRole).toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
+}
+
+bool keyEscapeReceiver::eventFilter(QObject* obj, QEvent* event)
+{
+    if (event->type()==QEvent::KeyPress) {
+        QKeyEvent* key = static_cast<QKeyEvent*>(event);
+        if ( (key->key()==Qt::Key_Escape) ) {
+            //Escape key was pressed
+            QApplication::quit();
+        } else {
+            return QObject::eventFilter(obj, event);
+        }
+        return true;
+    } else {
+        return QObject::eventFilter(obj, event);
+    }
+    return false;
 }

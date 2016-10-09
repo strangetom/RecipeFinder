@@ -49,4 +49,11 @@ private:
 
 };
 
+class keyEscapeReceiver : public QObject
+{
+    Q_OBJECT
+protected:
+    bool eventFilter(QObject* obj, QEvent* event);
+};
+
 #endif
