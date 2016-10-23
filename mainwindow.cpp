@@ -24,7 +24,7 @@ Window::Window(QWidget *parent) : QWidget(parent)
     setLayout(mainLayout);
 
     setWindowTitle(tr("Find Recipes"));
-    resize(500, 300);
+    resize(500, 500);
 }
 
 // Get list of files according to glob patternn
@@ -77,18 +77,29 @@ void Window::showFiles(const std::map<double, QString> &files)
 
     for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
         QString path_name = iter->second;
-        QTableWidgetItem *fileNameItem = new QTableWidgetItem(path_name.split('/')[1]);
+        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
+
+        QTableWidgetItem *fileNameItem = new QTableWidgetItem(path_name.split('/')[1].replace(".md", ""));
         fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
         // Store full file path as hidden data
         fileNameItem->setData(Qt::UserRole, path_name);
-        QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(round(iter->first)) ));
-        rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
-        fileNameItem->setFlags(rankItem->flags() ^ Qt::ItemIsEditable);
+
+        QTableWidgetItem *imageItem = new QTableWidgetItem();
+        QImage *img = new QImage();
+        bool loaded = img->load(img_path);
+        if (loaded){
+            imageItem->setData(Qt::DecorationRole, QPixmap::fromImage(*img).scaled(178, 100));
+        }
+
+        //QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(round(iter->first)) ));
+        //rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
+        //fileNameItem->setFlags(rankItem->flags() ^ Qt::ItemIsEditable);
 
         int row = filesTable->rowCount();
         filesTable->insertRow(row);
         filesTable->setItem(row, 0, fileNameItem);
-        filesTable->setItem(row, 1, rankItem);
+        filesTable->setItem(row, 1, imageItem);
+        //filesTable->setItem(row, 2, rankItem);
     }
     filesTable->selectRow(0);
 }
@@ -99,14 +110,15 @@ void Window::createFilesTable()
     filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
     QStringList labels;
-    labels << tr("Recipe") << tr("Rank");
+    labels << tr("Recipe") << tr("Image");
     filesTable->setHorizontalHeaderLabels(labels);
+    filesTable->verticalHeader()->setDefaultSectionSize(100);
+    filesTable->horizontalHeader()->setDefaultSectionSize(178);
     filesTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     filesTable->verticalHeader()->hide();
     filesTable->setShowGrid(false);
 
-    connect(filesTable, &QTableWidget::cellActivated,
-            this, &Window::openFileOfItem);
+    connect(filesTable, &QTableWidget::cellActivated, this, &Window::openFileOfItem);
 }
 
 void Window::openFileOfItem(int row, int /* column */)
