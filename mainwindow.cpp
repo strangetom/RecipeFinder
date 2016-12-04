@@ -10,8 +10,8 @@ Window::Window(QWidget *parent) : QWidget(parent)
     textLabel = new QLabel(tr("Search:"));
     searchBox = new SearchBox();
     connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
-    createFilesTable();
-    connect(searchBox, SIGNAL(returnPressed()), filesTable, SLOT(setFocus()));
+    createRecipeList();
+    connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
 
     // Event filter to capture Esc key press
     keyEscapeReceiver* key = new keyEscapeReceiver();
@@ -20,11 +20,11 @@ Window::Window(QWidget *parent) : QWidget(parent)
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(textLabel, 0, 0);
     mainLayout->addWidget(searchBox, 0, 1, 1, 1);
-    mainLayout->addWidget(filesTable, 1, 0, 1, 4);
+    mainLayout->addWidget(recipeList, 1, 0, 1, 4);
     setLayout(mainLayout);
 
     setWindowTitle(tr("Find Recipes"));
-    resize(500, 500);
+    setFixedSize(600, 400);
 }
 
 // Get list of files according to glob patternn
@@ -73,59 +73,39 @@ std::map<double, QString> SearchBox::findFiles(const QStringList &files, const Q
 
 void Window::showFiles(const std::map<double, QString> &files)
 {
-    filesTable->setRowCount(0);
-
+    recipeList->clear();
     for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
         QString path_name = iter->second;
         QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
 
-        QTableWidgetItem *fileNameItem = new QTableWidgetItem(path_name.split('/')[1].replace(".md", ""));
-        fileNameItem->setFlags(fileNameItem->flags() ^ Qt::ItemIsEditable);
-        // Store full file path as hidden data
-        fileNameItem->setData(Qt::UserRole, path_name);
-
-        QTableWidgetItem *imageItem = new QTableWidgetItem();
+        QListWidgetItem *recipe = new QListWidgetItem;
+        recipe->setText(path_name.split('/')[1].replace(".md", ""));
+        recipe->setData(Qt::UserRole, path_name);
         QImage *img = new QImage();
         bool loaded = img->load(img_path);
         if (loaded){
-            imageItem->setData(Qt::DecorationRole, QPixmap::fromImage(*img).scaled(178, 100));
+            recipe->setIcon(QPixmap::fromImage(*img));
         }
-
-        //QTableWidgetItem *rankItem = new QTableWidgetItem(tr("%1").arg(int(round(iter->first)) ));
-        //rankItem->setTextAlignment(Qt::AlignCenter | Qt::AlignVCenter);
-        //fileNameItem->setFlags(rankItem->flags() ^ Qt::ItemIsEditable);
-
-        int row = filesTable->rowCount();
-        filesTable->insertRow(row);
-        filesTable->setItem(row, 0, fileNameItem);
-        filesTable->setItem(row, 1, imageItem);
-        //filesTable->setItem(row, 2, rankItem);
+        recipeList->addItem(recipe);
     }
-    filesTable->selectRow(0);
 }
 
-void Window::createFilesTable()
+void Window::createRecipeList()
 {
-    filesTable = new QTableWidget(0, 2);
-    filesTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+    recipeList = new QListWidget();
+    recipeList->setViewMode(QListView::IconMode);
+    recipeList->setIconSize(QSize(267, 150));
+    recipeList->setGridSize(QSize(280, 185));
+    recipeList->setWordWrap(true);
+    recipeList->setTextElideMode(Qt::ElideNone);
 
-    QStringList labels;
-    labels << tr("Recipe") << tr("Image");
-    filesTable->setHorizontalHeaderLabels(labels);
-    filesTable->verticalHeader()->setDefaultSectionSize(100);
-    filesTable->horizontalHeader()->setDefaultSectionSize(178);
-    filesTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    filesTable->verticalHeader()->hide();
-    filesTable->setShowGrid(false);
-
-    connect(filesTable, &QTableWidget::cellActivated, this, &Window::openFileOfItem);
+    connect(recipeList, &QListWidget::itemDoubleClicked, this, &Window::openFile);
 }
 
-void Window::openFileOfItem(int row, int /* column */)
+void Window::openFile(QListWidgetItem *recipe)
 {
-    QTableWidgetItem *item = filesTable->item(row, 0);
     // Read hidden data to find full file path
-    QString path = item->data(Qt::UserRole).toString();
+    QString path = recipe->data(Qt::UserRole).toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
 }
 

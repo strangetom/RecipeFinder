@@ -12,18 +12,6 @@
 #include <ctype.h> // ::tolower, ::toupper
 
 namespace fts {
-    
-    // Returns true if each character in pattern is found sequentially within str
-    static bool fuzzy_match(char const * pattern, char const * str) 
-    {
-        while (*pattern != '\0' && *str != '\0')  {
-            if (tolower(*pattern) == tolower(*str))
-                ++pattern;
-            ++str;
-        }
-
-        return *pattern == '\0' ? true : false;
-    }
 
     // Returns true if each character in pattern is found sequentially within str
     // iff found then outScore is also set. Score value has no intrinsic meaning. Range varies with pattern. 

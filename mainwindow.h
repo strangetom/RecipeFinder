@@ -4,13 +4,11 @@
 #include <QWidget>
 #include <QDir>
 #include <QLineEdit>
+#include <QListWidget>
 #include <map>
 
 class QLabel;
 class QPushButton;
-class QTableWidget;
-class QTableWidgetItem;
-
 
 class SearchBox: public QLineEdit
 {
@@ -36,16 +34,16 @@ public:
     Window(QWidget *parent = 0);
 
 private slots:
-    void openFileOfItem(int row, int column);
+    void openFile(QListWidgetItem *recipe);
     void showFiles(const std::map<double, QString> &files);
 
 private:
-    void createFilesTable();
+    void createRecipeList();
 
     SearchBox *searchBox;
     QLabel *textLabel;
-    QTableWidget *filesTable;
     QDir currentDir;
+    QListWidget *recipeList;
 
 };
 
