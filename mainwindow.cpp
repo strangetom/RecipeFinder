@@ -57,9 +57,9 @@ std::map<double, QString> SearchBox::findFiles(const QStringList &files, const Q
     std::string txtstr = text.toStdString();
     for (int i=0; i<files.size(); ++i){
         int score;
-        std::string filestr = files[i].toStdString();
+        std::string filestr = files[i].split('/')[1].toStdString();
         if (fts::fuzzy_match_score(txtstr.c_str(), filestr.c_str(), score)){
-            // If a map entry already has the current score, increase score by 0.01. When dispaying, we'll round back to int.
+            // If a map entry already has the current score, increase score by 0.01.
             double dbscore = (double)score;
             if (matchingFiles.count(dbscore) > 0){
                 dbscore += 0.01;
