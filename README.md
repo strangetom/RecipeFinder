@@ -28,3 +28,8 @@ RecipeFinder
 └── Veggie/
 ```
 The ```Images/``` folder must exist. The recipes reside in the other folders as \*.md files. These folder names can change.
+
+### Demo
+
+![](./recipefinder.gif)
+
