@@ -13,7 +13,7 @@ The fuzzy search is implemented using ```lib_fts``` from [forrestthewoods](https
 2. Mark as executable ```chmod +x RecipeFinder```
 3. Run
 
-Note that the program requires Qt 5.7 to run. 
+Note that the program requires Qt 5.8 to run. 
 This program also assumes the following folder structure:
 ```
 .
