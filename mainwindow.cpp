@@ -16,8 +16,8 @@ Window::Window(QWidget *parent) : QWidget(parent)
     createRecipeList();
 
     connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
-    connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
     connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
+    connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(searchBox, 0, 0, 1, 3);
@@ -124,5 +124,33 @@ void Window::openFile(QListWidgetItem *recipe)
     // Read hidden data to find full file path
     QString path = recipe->data(Qt::UserRole).toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
+}
+
+void Window::resizeEvent(QResizeEvent *event){
+    int iconWidth, iconHeight, gridWidth, gridHeight, columns;
+    double gridRatio = 280.0/185.0;
+    double iconRatio = 267.0/150.0;
+    QSize recipeListSize = recipeList->size();
+
+    if(recipeListSize.width()<=578){
+        // Set defaults for minimum size
+        columns = 2;
+        iconWidth = 267;
+        iconHeight = 150;
+        gridWidth = 280;
+        gridHeight = 185;
+    }else{
+        // Icons should never go larger than default, so set number of columns to round up
+        columns = ceil(recipeListSize.width()/280.0);
+        // Width of grid is widget_width/columns, with extra width removed to allow for scrollbar
+        gridWidth = int(recipeListSize.width()/columns) - ceil(18.0/columns);
+        // Calculate other parameters based on ratios of default values.
+        gridHeight = int(gridWidth/gridRatio);
+        iconWidth = gridWidth - 13;
+        iconHeight = int(iconWidth/iconRatio);
+    }
+
+    recipeList->setIconSize(QSize(iconWidth, iconHeight));
+    recipeList->setGridSize(QSize(gridWidth, gridHeight));
 }
 

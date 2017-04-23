@@ -43,6 +43,7 @@ private slots:
     void showFiles(const std::map<double, QString> &files);
 
 private:
+    void resizeEvent(QResizeEvent *event);
     void createRecipeList();
 
     SearchBox *searchBox;
