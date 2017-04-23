@@ -7,24 +7,26 @@
 
 Window::Window(QWidget *parent) : QWidget(parent)
 {
-    textLabel = new QLabel(tr("Search:"));
     searchBox = new SearchBox();
-    connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
+    searchBox->setPlaceholderText("Search for recipes");
+    recipeBox = new QComboBox();
+    QStringList recipeCategories;
+    recipeCategories << "All Recipes" << "Beef" << "Chicken" << "Dessert" << "Lamb" << "Pork" << "Seafood" << "Turkey" << "Veggie";
+    recipeBox->addItems(recipeCategories);
     createRecipeList();
+
+    connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
+    connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
     connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
 
-    // Event filter to capture Esc key press
-    keyEscapeReceiver* key = new keyEscapeReceiver();
-    this->installEventFilter(key);
-
     QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->addWidget(textLabel, 0, 0);
-    mainLayout->addWidget(searchBox, 0, 1, 1, 1);
+    mainLayout->addWidget(searchBox, 0, 0, 1, 3);
+    mainLayout->addWidget(recipeBox, 0, 3, 1, 1);
     mainLayout->addWidget(recipeList, 1, 0, 1, 4);
     setLayout(mainLayout);
 
     setWindowTitle(tr("Find Recipes"));
-    setFixedSize(600, 400);
+    setMinimumSize(600, 400);
 }
 
 // Get list of files according to glob patternn
@@ -39,10 +41,20 @@ QStringList globVector(const std::string& pattern){
     return files;
 }
 
+void SearchBox::recipeFiterChanged(QString newFilter){
+    recipeFiter = newFilter;
+}
+
 void SearchBox::keyPressEvent(QKeyEvent *evt){
 
+    // Set pattern based on category selection
+    std::string pattern = "*/*.md";
+    if(recipeFiter != "All Recipes"){
+        pattern = recipeFiter.toStdString() + "/*.md";
+    }
+
     QLineEdit::keyPressEvent(evt);
-    QStringList files = globVector("*/*.md");
+    QStringList files = globVector(pattern);
     std::map<double, QString> matches;
     if (!text().isEmpty()){
         matches = findFiles(files, text());
@@ -70,7 +82,6 @@ std::map<double, QString> SearchBox::findFiles(const QStringList &files, const Q
     return matchingFiles;
 }
 
-
 void Window::showFiles(const std::map<double, QString> &files)
 {
     recipeList->clear();
@@ -85,6 +96,12 @@ void Window::showFiles(const std::map<double, QString> &files)
         bool loaded = img->load(img_path);
         if (loaded){
             recipe->setIcon(QPixmap::fromImage(*img));
+        }else{
+            // If image doesn't exist, use placeholder image
+            bool loaded = img->load("./Images/Placeholder.jpg");
+            if (loaded){
+                recipe->setIcon(QPixmap::fromImage(*img));
+            }
         }
         recipeList->addItem(recipe);
     }
@@ -109,19 +126,3 @@ void Window::openFile(QListWidgetItem *recipe)
     QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
 }
 
-bool keyEscapeReceiver::eventFilter(QObject* obj, QEvent* event)
-{
-    if (event->type()==QEvent::KeyPress) {
-        QKeyEvent* key = static_cast<QKeyEvent*>(event);
-        if ( (key->key()==Qt::Key_Escape) ) {
-            //Escape key was pressed
-            QApplication::quit();
-        } else {
-            return QObject::eventFilter(obj, event);
-        }
-        return true;
-    } else {
-        return QObject::eventFilter(obj, event);
-    }
-    return false;
-}

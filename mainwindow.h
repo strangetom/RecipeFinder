@@ -5,6 +5,7 @@
 #include <QDir>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QComboBox>
 #include <map>
 
 class QLabel;
@@ -20,9 +21,13 @@ public:
 private:
     std::map<double, QString> findFiles(const QStringList &files, const QString &text);
     void keyPressEvent(QKeyEvent *e);
+    QString recipeFiter = QString("All Recipes");
 
 signals:
     void updateMatches(std::map<double, QString> matchedFiles);
+
+private slots:
+    void recipeFiterChanged(QString newFilter);
 };
 
 
@@ -41,17 +46,9 @@ private:
     void createRecipeList();
 
     SearchBox *searchBox;
-    QLabel *textLabel;
     QDir currentDir;
     QListWidget *recipeList;
-
-};
-
-class keyEscapeReceiver : public QObject
-{
-    Q_OBJECT
-protected:
-    bool eventFilter(QObject* obj, QEvent* event);
+    QComboBox *recipeBox;
 };
 
 #endif
