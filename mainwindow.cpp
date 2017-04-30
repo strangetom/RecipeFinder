@@ -14,19 +14,25 @@ Window::Window(QWidget *parent) : QWidget(parent)
     recipeCategories << "All Recipes" << "Beef" << "Chicken" << "Dessert" << "Lamb" << "Pork" << "Seafood" << "Turkey" << "Veggie";
     recipeBox->addItems(recipeCategories);
     createRecipeList();
+    numResults = new QLabel();
 
-    connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showFiles(std::map<double, QString>)));
+    connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showMatchedFiles(std::map<double, QString>)));
+    connect(searchBox, SIGNAL(emptySearch()), this, SLOT(showAllFiles()));
     connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
     connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
-
+    connect(recipeBox, SIGNAL(currentTextChanged(QString)), this, SLOT(showAllFiles()));
+    // Set layout
     QGridLayout *mainLayout = new QGridLayout;
-    mainLayout->addWidget(searchBox, 0, 0, 1, 3);
-    mainLayout->addWidget(recipeBox, 0, 3, 1, 1);
-    mainLayout->addWidget(recipeList, 1, 0, 1, 4);
+    mainLayout->addWidget(searchBox, 0, 0, 1, 6);
+    mainLayout->addWidget(numResults, 0, 6, 1, 1);
+    mainLayout->addWidget(recipeBox, 0, 7, 1, 1);
+    mainLayout->addWidget(recipeList, 1, 0, 1, 8);
     setLayout(mainLayout);
-
+    // Set window paramters
     setWindowTitle(tr("Find Recipes"));
     setMinimumSize(600, 400);
+    // Populate list on start up
+    showAllFiles();
 }
 
 // Get list of files according to glob patternn
@@ -58,8 +64,11 @@ void SearchBox::keyPressEvent(QKeyEvent *evt){
     std::map<double, QString> matches;
     if (!text().isEmpty()){
         matches = findFiles(files, text());
+        emit updateMatches(matches);
+    }else{
+        emit emptySearch();
     }
-    emit updateMatches(matches);
+
 }
 
 std::map<double, QString> SearchBox::findFiles(const QStringList &files, const QString &text)
@@ -82,10 +91,45 @@ std::map<double, QString> SearchBox::findFiles(const QStringList &files, const Q
     return matchingFiles;
 }
 
-void Window::showFiles(const std::map<double, QString> &files)
+void Window::showAllFiles(){
+    recipeList->clear();
+
+    std::string pattern = "*/*.md";
+    if(recipeBox->currentText() != "All Recipes"){
+        pattern = recipeBox->currentText().toStdString() + "/*.md";
+    }
+    QStringList files = globVector(pattern);
+    for (int i=0; i<files.size(); ++i){
+        QString path_name = files[i];
+        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
+
+        QListWidgetItem *recipe = new QListWidgetItem;
+        recipe->setText(path_name.split('/')[1].replace(".md", ""));
+        recipe->setData(Qt::UserRole, path_name);
+        QImage *img = new QImage();
+        bool loaded = img->load(img_path);
+        if (loaded){
+            recipe->setIcon(QPixmap::fromImage(*img));
+        }else{
+            // If image doesn't exist, use placeholder image
+            bool loaded = img->load("./Images/Placeholder.jpg");
+            if (loaded){
+                recipe->setIcon(QPixmap::fromImage(*img));
+            }
+        }
+        recipeList->addItem(recipe);
+        recipeList->sortItems();
+    }
+    QString text = QString("%1 recipes").arg(files.size());
+    numResults->setText(text);
+
+}
+
+
+void Window::showMatchedFiles(const std::map<double, QString> &matchedfiles)
 {
     recipeList->clear();
-    for (auto iter = files.rbegin(); iter != files.rend(); ++iter){
+    for (auto iter = matchedfiles.rbegin(); iter != matchedfiles.rend(); ++iter){
         QString path_name = iter->second;
         QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
 
@@ -105,6 +149,8 @@ void Window::showFiles(const std::map<double, QString> &files)
         }
         recipeList->addItem(recipe);
     }
+    QString text = QString("%1 recipes").arg(matchedfiles.size());
+    numResults->setText(text);
 }
 
 void Window::createRecipeList()

@@ -25,6 +25,7 @@ private:
 
 signals:
     void updateMatches(std::map<double, QString> matchedFiles);
+    void emptySearch();
 
 private slots:
     void recipeFiterChanged(QString newFilter);
@@ -40,7 +41,8 @@ public:
 
 private slots:
     void openFile(QListWidgetItem *recipe);
-    void showFiles(const std::map<double, QString> &files);
+    void showMatchedFiles(const std::map<double, QString> &matchedfiles);
+    void showAllFiles();
 
 private:
     void resizeEvent(QResizeEvent *event);
@@ -50,6 +52,7 @@ private:
     QDir currentDir;
     QListWidget *recipeList;
     QComboBox *recipeBox;
+    QLabel *numResults;
 };
 
 #endif
