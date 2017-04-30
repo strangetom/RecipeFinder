@@ -33,3 +33,5 @@ The ```Images/``` folder must exist. The recipes reside in the other folders as 
 
 ![](./recipefinder.gif)
 
+### Things to look at in the future
+* Move recipes to a database with fields for title, file location, image location. This is because displaying all the recipes is starting to slow down.
