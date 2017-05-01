@@ -79,13 +79,13 @@ void Window::updateRecipesDiplay(QString searchText){
 }
 
 QList<QListWidgetItem*> Window::getRecipeList(QString searchText){
-  QList<QListWidgetItem*> recipes;
-  if (searchText.isEmpty()) {
-    recipes = getAllRecipes();
-  }else{
-    recipes = getMatchingRecipes(searchText);
-  }
-  return recipes;
+    QList<QListWidgetItem*> recipes;
+    if (searchText.isEmpty()) {
+        recipes = getAllRecipes();
+    }else{
+        recipes = getMatchingRecipes(searchText);
+    }
+    return recipes;
 }
 
 QList<QListWidgetItem*> Window::getAllRecipes(){
