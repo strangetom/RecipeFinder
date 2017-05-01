@@ -19,13 +19,10 @@ public:
     using QLineEdit::QLineEdit;
 
 private:
-    std::map<double, QString> findFiles(const QStringList &files, const QString &text);
-    void keyPressEvent(QKeyEvent *e);
-    QString recipeFiter = QString("All Recipes");
+    void keyPressEvent(QKeyEvent *evt);
 
 signals:
-    void updateMatches(std::map<double, QString> matchedFiles);
-    void emptySearch();
+    void inputText(QString searchText);
 
 private slots:
     void recipeFiterChanged(QString newFilter);
@@ -41,12 +38,16 @@ public:
 
 private slots:
     void openFile(QListWidgetItem *recipe);
-    void showMatchedFiles(const std::map<double, QString> &matchedfiles);
-    void showAllFiles();
+    void updateRecipesDiplay(QString searchText);
 
 private:
     void resizeEvent(QResizeEvent *event);
     void createRecipeList();
+
+    QList<QListWidgetItem*> getRecipeList(QString searchText);
+    QList<QListWidgetItem*> getAllRecipes();
+    QList<QListWidgetItem*> getMatchingRecipes(QString searchText);
+    std::map<double, QString> findMatches(QString text);
 
     SearchBox *searchBox;
     QDir currentDir;

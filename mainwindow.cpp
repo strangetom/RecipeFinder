@@ -7,6 +7,7 @@
 
 Window::Window(QWidget *parent) : QWidget(parent)
 {
+    // Initialise widgets
     searchBox = new SearchBox();
     searchBox->setPlaceholderText("Search for recipes");
     recipeBox = new QComboBox();
@@ -16,11 +17,6 @@ Window::Window(QWidget *parent) : QWidget(parent)
     createRecipeList();
     numResults = new QLabel();
 
-    connect(searchBox, SIGNAL(updateMatches(std::map<double, QString>)), this, SLOT(showMatchedFiles(std::map<double, QString>)));
-    connect(searchBox, SIGNAL(emptySearch()), this, SLOT(showAllFiles()));
-    connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
-    connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
-    connect(recipeBox, SIGNAL(currentTextChanged(QString)), this, SLOT(showAllFiles()));
     // Set layout
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(searchBox, 0, 0, 1, 6);
@@ -28,11 +24,19 @@ Window::Window(QWidget *parent) : QWidget(parent)
     mainLayout->addWidget(recipeBox, 0, 7, 1, 1);
     mainLayout->addWidget(recipeList, 1, 0, 1, 8);
     setLayout(mainLayout);
+
     // Set window paramters
     setWindowTitle(tr("Find Recipes"));
     setMinimumSize(600, 400);
+
+    // Set signals
+    connect(recipeList, &QListWidget::itemDoubleClicked, this, &Window::openFile);
+    connect(searchBox, SIGNAL(inputText(QString)), this, SLOT(updateRecipesDiplay(QString)));
+    connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
+    connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
+
     // Populate list on start up
-    showAllFiles();
+    updateRecipesDiplay("");
 }
 
 // Get list of files according to glob patternn
@@ -48,33 +52,120 @@ QStringList globVector(const std::string& pattern){
 }
 
 void SearchBox::recipeFiterChanged(QString newFilter){
-    recipeFiter = newFilter;
+    // When the recipe filter changes, emit this signal to call updateRecipeDisplay
+    emit inputText(text());
 }
 
 void SearchBox::keyPressEvent(QKeyEvent *evt){
-
-    // Set pattern based on category selection
-    std::string pattern = "*/*.md";
-    if(recipeFiter != "All Recipes"){
-        pattern = recipeFiter.toStdString() + "/*.md";
-    }
-
     QLineEdit::keyPressEvent(evt);
-    QStringList files = globVector(pattern);
-    std::map<double, QString> matches;
-    if (!text().isEmpty()){
-        matches = findFiles(files, text());
-        emit updateMatches(matches);
-    }else{
-        emit emptySearch();
-    }
-
+    // When the search changes, emit this signal to call updateRecipeDisplay
+    emit inputText(text());
 }
 
-std::map<double, QString> SearchBox::findFiles(const QStringList &files, const QString &text)
-{
-    std::map<double, QString> matchingFiles;
+void Window::updateRecipesDiplay(QString searchText){
+    recipeList->clear();
 
+    QList<QListWidgetItem*> recipes = getRecipeList(searchText);
+    for (int i=0; i<recipes.size(); ++i){
+        recipeList->addItem(recipes[i]);
+    }
+
+    if(searchText.isEmpty()){
+        recipeList->sortItems();
+    }
+
+    QString text = QString("%1 recipes").arg(recipes.size());
+    numResults->setText(text);
+}
+
+QList<QListWidgetItem*> Window::getRecipeList(QString searchText){
+  QList<QListWidgetItem*> recipes;
+  if (searchText.isEmpty()) {
+    recipes = getAllRecipes();
+  }else{
+    recipes = getMatchingRecipes(searchText);
+  }
+  return recipes;
+}
+
+QList<QListWidgetItem*> Window::getAllRecipes(){
+    QList<QListWidgetItem*> recipes;
+
+    // Get all files in current recipe filter
+    std::string pattern = "*/*.md";
+    if(recipeBox->currentText() != "All Recipes"){
+        pattern = recipeBox->currentText().toStdString() + "/*.md";
+    }
+    QStringList files = globVector(pattern);
+    // Build QListWidgetItems and add to QList
+    for (int i=0; i<files.size(); ++i){
+        QString path_name = files[i];
+        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
+
+        QListWidgetItem *recipe = new QListWidgetItem;
+        recipe->setText(path_name.split('/')[1].replace(".md", ""));
+        recipe->setData(Qt::UserRole, path_name);
+
+        QImage *img = new QImage();
+        bool loaded = img->load(img_path);
+        if (loaded){
+            recipe->setIcon(QPixmap::fromImage(*img));
+        }else{
+            // If image doesn't exist, use placeholder image
+            bool loaded = img->load("./Images/Placeholder.jpg");
+            if (loaded){
+                recipe->setIcon(QPixmap::fromImage(*img));
+            }
+        }
+        recipes.append(recipe);
+    }
+
+    return recipes;
+}
+
+
+QList<QListWidgetItem*> Window::getMatchingRecipes(QString searchText){
+    QList<QListWidgetItem*> recipes;
+
+    // Get matching recipes and their scores
+    std::map<double, QString> matchingRecipes = findMatches(searchText);
+    // Build QListWidgetItems and add to QList
+    // By default the map should be in ascending order, so use reverse iterator to get highest matches first
+    for (auto iter = matchingRecipes.rbegin(); iter != matchingRecipes.rend(); ++iter){
+        QString path_name = iter->second;
+        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
+
+        QListWidgetItem *recipe = new QListWidgetItem;
+        recipe->setText(path_name.split('/')[1].replace(".md", ""));
+        recipe->setData(Qt::UserRole, path_name);
+
+        QImage *img = new QImage();
+        bool loaded = img->load(img_path);
+        if (loaded){
+            recipe->setIcon(QPixmap::fromImage(*img));
+        }else{
+            // If image doesn't exist, use placeholder image
+            bool loaded = img->load("./Images/Placeholder.jpg");
+            if (loaded){
+                recipe->setIcon(QPixmap::fromImage(*img));
+            }
+        }
+        recipes.append(recipe);
+    }
+
+    return recipes;
+}
+
+std::map<double, QString> Window::findMatches(QString text)
+{
+    // Get all files in current recipe filter
+    std::string pattern = "*/*.md";
+    if(recipeBox->currentText() != "All Recipes"){
+        pattern = recipeBox->currentText().toStdString() + "/*.md";
+    }
+    QStringList files = globVector(pattern);
+    // Get matching files and their scores
+    std::map<double, QString> matchingFiles;
     std::string txtstr = text.toStdString();
     for (int i=0; i<files.size(); ++i){
         int score;
@@ -91,68 +182,6 @@ std::map<double, QString> SearchBox::findFiles(const QStringList &files, const Q
     return matchingFiles;
 }
 
-void Window::showAllFiles(){
-    recipeList->clear();
-
-    std::string pattern = "*/*.md";
-    if(recipeBox->currentText() != "All Recipes"){
-        pattern = recipeBox->currentText().toStdString() + "/*.md";
-    }
-    QStringList files = globVector(pattern);
-    for (int i=0; i<files.size(); ++i){
-        QString path_name = files[i];
-        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
-
-        QListWidgetItem *recipe = new QListWidgetItem;
-        recipe->setText(path_name.split('/')[1].replace(".md", ""));
-        recipe->setData(Qt::UserRole, path_name);
-        QImage *img = new QImage();
-        bool loaded = img->load(img_path);
-        if (loaded){
-            recipe->setIcon(QPixmap::fromImage(*img));
-        }else{
-            // If image doesn't exist, use placeholder image
-            bool loaded = img->load("./Images/Placeholder.jpg");
-            if (loaded){
-                recipe->setIcon(QPixmap::fromImage(*img));
-            }
-        }
-        recipeList->addItem(recipe);
-        recipeList->sortItems();
-    }
-    QString text = QString("%1 recipes").arg(files.size());
-    numResults->setText(text);
-
-}
-
-
-void Window::showMatchedFiles(const std::map<double, QString> &matchedfiles)
-{
-    recipeList->clear();
-    for (auto iter = matchedfiles.rbegin(); iter != matchedfiles.rend(); ++iter){
-        QString path_name = iter->second;
-        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
-
-        QListWidgetItem *recipe = new QListWidgetItem;
-        recipe->setText(path_name.split('/')[1].replace(".md", ""));
-        recipe->setData(Qt::UserRole, path_name);
-        QImage *img = new QImage();
-        bool loaded = img->load(img_path);
-        if (loaded){
-            recipe->setIcon(QPixmap::fromImage(*img));
-        }else{
-            // If image doesn't exist, use placeholder image
-            bool loaded = img->load("./Images/Placeholder.jpg");
-            if (loaded){
-                recipe->setIcon(QPixmap::fromImage(*img));
-            }
-        }
-        recipeList->addItem(recipe);
-    }
-    QString text = QString("%1 recipes").arg(matchedfiles.size());
-    numResults->setText(text);
-}
-
 void Window::createRecipeList()
 {
     recipeList = new QListWidget();
@@ -161,8 +190,6 @@ void Window::createRecipeList()
     recipeList->setGridSize(QSize(280, 185));
     recipeList->setWordWrap(true);
     recipeList->setTextElideMode(Qt::ElideNone);
-
-    connect(recipeList, &QListWidget::itemDoubleClicked, this, &Window::openFile);
 }
 
 void Window::openFile(QListWidgetItem *recipe)
