@@ -75,6 +75,9 @@ void Window::updateRecipesDiplay(QString searchText){
     }
 
     QString text = QString("%1 recipes").arg(recipes.size());
+    if (recipes.size() == 1){
+        text = "1 recipe";
+    }
     numResults->setText(text);
 }
 
