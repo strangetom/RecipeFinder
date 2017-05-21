@@ -6,6 +6,7 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QComboBox>
+#include <QtSql>
 #include <map>
 
 class QLabel;
@@ -48,6 +49,8 @@ private:
     QList<QListWidgetItem*> getAllRecipes();
     QList<QListWidgetItem*> getMatchingRecipes(QString searchText);
     std::map<double, QString> findMatches(QString text);
+
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
     SearchBox *searchBox;
     QDir currentDir;

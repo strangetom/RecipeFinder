@@ -4,9 +4,13 @@
 #include <glob.h>
 #include <string>
 #include <map>
+#include <database.h>
 
 Window::Window(QWidget *parent) : QWidget(parent)
 {
+    // Initalise database
+    db.setDatabaseName("recipes.db");
+
     // Initialise widgets
     searchBox = new SearchBox();
     searchBox->setPlaceholderText("Search for recipes");
@@ -37,6 +41,8 @@ Window::Window(QWidget *parent) : QWidget(parent)
 
     // Populate list on start up
     updateRecipesDiplay("");
+
+    db_ops::update_database(&db);
 }
 
 // Get list of files according to glob patternn
@@ -94,20 +100,21 @@ QList<QListWidgetItem*> Window::getRecipeList(QString searchText){
 QList<QListWidgetItem*> Window::getAllRecipes(){
     QList<QListWidgetItem*> recipes;
 
-    // Get all files in current recipe filter
-    std::string pattern = "*/*.md";
-    if(recipeBox->currentText() != "All Recipes"){
-        pattern = recipeBox->currentText().toStdString() + "/*.md";
-    }
-    QStringList files = globVector(pattern);
-    // Build QListWidgetItems and add to QList
-    for (int i=0; i<files.size(); ++i){
-        QString path_name = files[i];
-        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
+    // Open database and execute query
+    db.open();
+    QSqlQuery query = QSqlQuery();
+    query.exec("select TITLE, IMG_PATH, FILE_PATH from RECIPES");
 
+    while(query.next()){
+        // Extract info from query results
+        QString title = query.value(0).toString();
+        QString img_path = query.value(1).toString();
+        QString file_path = query.value(2).toString();
+
+        // Create QListWidgetItems
         QListWidgetItem *recipe = new QListWidgetItem;
-        recipe->setText(path_name.split('/')[1].replace(".md", ""));
-        recipe->setData(Qt::UserRole, path_name);
+        recipe->setText(title);
+        recipe->setData(Qt::UserRole, file_path);
 
         QImage *img = new QImage();
         bool loaded = img->load(img_path);
@@ -122,7 +129,7 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
         }
         recipes.append(recipe);
     }
-
+    db.close();
     return recipes;
 }
 
