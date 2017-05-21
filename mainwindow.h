@@ -48,7 +48,7 @@ private:
     QList<QListWidgetItem*> getRecipeList(QString searchText);
     QList<QListWidgetItem*> getAllRecipes();
     QList<QListWidgetItem*> getMatchingRecipes(QString searchText);
-    std::map<double, QString> findMatches(QString text);
+    std::map<double, QStringList> findMatches(QString text);
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 

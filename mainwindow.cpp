@@ -135,17 +135,19 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
 QList<QListWidgetItem*> Window::getMatchingRecipes(QString searchText){
     QList<QListWidgetItem*> recipes;
 
-    // Get matching recipes and their scores
-    std::map<double, QString> matchingRecipes = findMatches(searchText);
+    // Get matching recipes and their scores. The QStringList contains title, img_path, file_path in order.
+    std::map<double, QStringList> matchingRecipes = findMatches(searchText);
     // Build QListWidgetItems and add to QList
     // By default the map should be in ascending order, so use reverse iterator to get highest matches first
     for (auto iter = matchingRecipes.rbegin(); iter != matchingRecipes.rend(); ++iter){
-        QString path_name = iter->second;
-        QString img_path = "Images/" + path_name.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
+
+        QString title = iter->second[0];
+        QString img_path = iter->second[1];
+        QString file_path = iter->second[2];
 
         QListWidgetItem *recipe = new QListWidgetItem;
-        recipe->setText(path_name.split('/')[1].replace(".md", ""));
-        recipe->setData(Qt::UserRole, path_name);
+        recipe->setText(title);
+        recipe->setData(Qt::UserRole, file_path);
 
         QImage *img = new QImage();
         bool loaded = img->load(img_path);
@@ -164,27 +166,41 @@ QList<QListWidgetItem*> Window::getMatchingRecipes(QString searchText){
     return recipes;
 }
 
-std::map<double, QString> Window::findMatches(QString text)
+std::map<double, QStringList> Window::findMatches(QString text)
 {
-    // Get all files in current recipe filter
-    std::string pattern = "*/*.md";
+    // Open database
+    db.open();
+    // Prepare query based on filter
+    QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
-        pattern = recipeBox->currentText().toStdString() + "/*.md";
+        QString category = recipeBox->currentText();
+        query.prepare("select TITLE, IMG_PATH, FILE_PATH from RECIPES where CATEGORY = :category");
+        query.bindValue(":category", category);
+        query.setForwardOnly(true);
+    }else{
+        query.prepare("select TITLE, IMG_PATH, FILE_PATH from RECIPES");
+        query.setForwardOnly(true);
     }
-    QStringList files = globVector(pattern);
+    // Execute query
+    query.exec();
+
     // Get matching files and their scores
-    std::map<double, QString> matchingFiles;
+    std::map<double, QStringList> matchingFiles;
     std::string txtstr = text.toStdString();
-    for (int i=0; i<files.size(); ++i){
+    while(query.next()){
         int score;
-        std::string filestr = files[i].split('/')[1].toStdString();
-        if (fts::fuzzy_match_score(txtstr.c_str(), filestr.c_str(), score)){
+        QString title = query.value(0).toString();
+        QString img_path = query.value(1).toString();
+        QString file_path = query.value(2).toString();
+
+        std::string titlestr = title.toStdString();
+        if (fts::fuzzy_match_score(txtstr.c_str(), titlestr.c_str(), score)){
             // If a map entry already has the current score, increase score by 0.01.
             double dbscore = (double)score;
             if (matchingFiles.count(dbscore) > 0){
                 dbscore += 0.01;
             }
-            matchingFiles[dbscore] = files[i];
+            matchingFiles[dbscore] = QStringList() << title << img_path << file_path;
         }
     }
     return matchingFiles;
