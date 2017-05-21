@@ -41,8 +41,6 @@ Window::Window(QWidget *parent) : QWidget(parent)
 
     // Populate list on start up
     updateRecipesDiplay("");
-
-    db_ops::update_database(&db);
 }
 
 // Get list of files according to glob patternn
