@@ -62,6 +62,11 @@ int db_ops::insert_recipe_in_db(QString title, QString img_path, QString file_pa
 
 int db_ops::update_database(QSqlDatabase *db)
 {
+    QFileInfo dbfile("recipes.db");
+    if(dbfile.size() < 1){
+        create_recipes_table(db);
+    }
+
     QStringList recipe_list = scan_recipes_folder();
     std::cout << "[INFO] Updating recipe database..." << std::endl;
     foreach(QString path, recipe_list){
