@@ -115,8 +115,19 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
 
     // Open database and execute query
     db.open();
+    // Prepare query based on filter
     QSqlQuery query = QSqlQuery();
-    query.exec("select TITLE, IMG_PATH, FILE_PATH from RECIPES");
+    if(recipeBox->currentText() != "All Recipes"){
+        QString category = recipeBox->currentText();
+        query.prepare("select TITLE, IMG_PATH, FILE_PATH from RECIPES where CATEGORY = :category");
+        query.bindValue(":category", category);
+        query.setForwardOnly(true);
+    }else{
+        query.prepare("select TITLE, IMG_PATH, FILE_PATH from RECIPES");
+        query.setForwardOnly(true);
+    }
+    // Execute query
+    query.exec();
 
     while(query.next()){
         // Extract info from query results
