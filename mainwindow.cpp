@@ -32,6 +32,18 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     centralWidget->show();
     setCentralWidget(centralWidget);
 
+    // Create menus
+    optionsMenu = new QMenu("Options");
+
+    updateDb = new QAction("Update database", this);
+    connect(updateDb, &QAction::triggered, this, &Window::updateDatabase);
+    cleanDb = new QAction("Clean database", this);
+    connect(cleanDb, &QAction::triggered, this, &Window::cleanDatabase);
+    optionsMenu->addAction(updateDb);
+    optionsMenu->addAction(cleanDb);
+
+    menuBar()->addMenu(optionsMenu);
+
     // Set window paramters
     setWindowTitle(tr("Find Recipes"));
     setMinimumSize(600, 400);
@@ -224,6 +236,14 @@ void Window::openFile(QListWidgetItem *recipe)
     // Read hidden data to find full file path
     QString path = recipe->data(Qt::UserRole).toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
+}
+
+void Window::updateDatabase(){
+    db_ops::update_database(&db);
+}
+
+void Window::cleanDatabase(){
+    db_ops::clean_database(&db);
 }
 
 void Window::resizeEvent(QResizeEvent *event){

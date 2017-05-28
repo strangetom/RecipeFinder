@@ -45,6 +45,8 @@ private slots:
 private:
     void resizeEvent(QResizeEvent *event);
     void createRecipeList();
+    void updateDatabase();
+    void cleanDatabase();
 
     QList<QListWidgetItem*> getRecipeList(QString searchText);
     QList<QListWidgetItem*> getAllRecipes();
@@ -54,8 +56,8 @@ private:
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
     QMenu *optionsMenu;
-    QAction *updateAct;
-    QAction *cleanAct;
+    QAction *updateDb;
+    QAction *cleanDb;
 
     QWidget *centralWidget;
     SearchBox *searchBox;
