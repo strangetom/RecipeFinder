@@ -2,6 +2,7 @@
 #define WINDOW_H
 
 #include <QWidget>
+#include <QMainWindow>
 #include <QDir>
 #include <QLineEdit>
 #include <QListWidget>
@@ -30,7 +31,7 @@ private slots:
 };
 
 
-class Window : public QWidget
+class Window : public QMainWindow
 {
     Q_OBJECT
 
@@ -52,6 +53,11 @@ private:
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
 
+    QMenu *optionsMenu;
+    QAction *updateAct;
+    QAction *cleanAct;
+
+    QWidget *centralWidget;
     SearchBox *searchBox;
     QDir currentDir;
     QListWidget *recipeList;

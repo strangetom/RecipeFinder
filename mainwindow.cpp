@@ -6,7 +6,7 @@
 #include <map>
 #include <database.h>
 
-Window::Window(QWidget *parent) : QWidget(parent)
+Window::Window(QWidget *parent) : QMainWindow(parent)
 {
     // Initalise database
     db.setDatabaseName("recipes.db");
@@ -22,12 +22,15 @@ Window::Window(QWidget *parent) : QWidget(parent)
     numResults = new QLabel();
 
     // Set layout
-    QGridLayout *mainLayout = new QGridLayout;
+    centralWidget = new QWidget();
+    QGridLayout *mainLayout = new QGridLayout(centralWidget);
     mainLayout->addWidget(searchBox, 0, 0, 1, 6);
     mainLayout->addWidget(numResults, 0, 6, 1, 1);
     mainLayout->addWidget(recipeBox, 0, 7, 1, 1);
     mainLayout->addWidget(recipeList, 1, 0, 1, 8);
-    setLayout(mainLayout);
+    centralWidget->setLayout(mainLayout);
+    centralWidget->show();
+    setCentralWidget(centralWidget);
 
     // Set window paramters
     setWindowTitle(tr("Find Recipes"));
@@ -229,7 +232,7 @@ void Window::resizeEvent(QResizeEvent *event){
     double iconRatio = 267.0/150.0;
     QSize recipeListSize = recipeList->size();
 
-    if(recipeListSize.width()<=578){
+    if(recipeListSize.width()<=587){
         // Set defaults for minimum size
         columns = 2;
         iconWidth = 267;
