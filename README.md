@@ -34,3 +34,9 @@ The ```Images/``` folder must exist. The recipes reside in the other folders as 
 ### Demo
 
 ![](./recipefinder.gif)
+
+
+
+## To do
+
+-   Give user feedback about database update and clean options.
