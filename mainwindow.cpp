@@ -229,6 +229,7 @@ std::map<double, QStringList> Window::findMatches(QString text)
             matchingFiles[dbscore] = QStringList() << title << img_path << file_path;
         }
     }
+    db.close();
     return matchingFiles;
 }
 
@@ -251,6 +252,8 @@ void Window::openFile(QListWidgetItem *recipe)
 
 void Window::updateDatabase(){
     db_ops::update_database(&db);
+    // Repopulate list
+    updateRecipesDiplay("");
 }
 
 void Window::cleanDatabase(){
