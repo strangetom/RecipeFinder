@@ -34,14 +34,12 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
 
     // Create menus
     optionsMenu = new QMenu("Options");
-
     updateDb = new QAction("Update database", this);
     connect(updateDb, &QAction::triggered, this, &Window::updateDatabase);
     cleanDb = new QAction("Clean database", this);
     connect(cleanDb, &QAction::triggered, this, &Window::cleanDatabase);
     optionsMenu->addAction(updateDb);
     optionsMenu->addAction(cleanDb);
-
     menuBar()->addMenu(optionsMenu);
 
     // Set window paramters
@@ -77,6 +75,7 @@ void SearchBox::recipeFiterChanged(QString newFilter){
 
 void SearchBox::keyPressEvent(QKeyEvent *evt){
     QLineEdit::keyPressEvent(evt);
+    setPlaceholderText("Search for recipes");
     // When the search changes, emit this signal to call updateRecipeDisplay
     emit inputText(text());
 }
@@ -252,12 +251,14 @@ void Window::openFile(QListWidgetItem *recipe)
 
 void Window::updateDatabase(){
     db_ops::update_database(&db);
+    searchBox->setPlaceholderText("Search for recipes - Updated!");
     // Repopulate list
     updateRecipesDiplay("");
 }
 
 void Window::cleanDatabase(){
     db_ops::clean_database(&db);
+    searchBox->setPlaceholderText("Search for recipes - Cleaned!");
 }
 
 void Window::resizeEvent(QResizeEvent *event){
