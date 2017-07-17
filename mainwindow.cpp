@@ -215,7 +215,7 @@ std::map<double, QStringList> Window::findMatches(QString text)
     while(query.next()){
         int score;
         QString title = query.value(0).toString();
-        QString img_path = query.value(1).toString();
+        QString img_path = query.value(1).toString().replace("\'", "").replace(",", "");
         QString file_path = query.value(2).toString();
 
         std::string titlestr = title.toStdString();
