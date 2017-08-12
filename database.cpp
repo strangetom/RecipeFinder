@@ -115,21 +115,22 @@ int db_ops::clean_database(QSqlDatabase *db)
     std::cout << "[INFO] Cleaning recipe database..." << std::endl;
     db->open();
     QSqlQuery query;
-    query.exec("SELECT FILE_PATH from RECIPES");
+    query.exec("SELECT JSON_PATH from RECIPES");
 
     while(query.next())
     {
-        QString file_path = query.value(0).toString();
-        QFileInfo file(file_path);
+        QString json_path = query.value(0).toString();
+        QFileInfo file(json_path);
         if(!file.exists())
         {
             QSqlQuery del = QSqlQuery();
-            del.prepare("DELETE from RECIPES where FILE_PATH = :file_path");
-            del.bindValue(":file_path", file_path);
+            del.prepare("DELETE from RECIPES where JSON_PATH = :json_path");
+            del.bindValue(":json_path", json_path);
             del.exec();
-            std::cout << "[INFO] " << file_path.toStdString() << " --> REMOVED" << std::endl;
+            std::cout << "[INFO] " << json_path.toStdString() << " --> REMOVED" << std::endl;
         }
     }
     db->close();
+    std::cout << "[INFO] Finished cleaning database." << std::endl;
     return 0;
 }
