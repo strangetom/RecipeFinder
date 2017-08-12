@@ -204,11 +204,11 @@ std::map<double, QStringList> Window::findMatches(QString text)
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
         QString category = recipeBox->currentText();
-        query.prepare("select TITLE, IMG_PATH, FILE_PATH from RECIPES where CATEGORY = :category");
+        query.prepare("select TITLE, IMG_PATH, HTML_PATH from RECIPES where CATEGORY = :category");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
     }else{
-        query.prepare("select TITLE, IMG_PATH, FILE_PATH from RECIPES");
+        query.prepare("select TITLE, IMG_PATH, HTML_PATH from RECIPES");
         query.setForwardOnly(true);
     }
     // Execute query
