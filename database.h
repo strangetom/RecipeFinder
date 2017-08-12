@@ -11,7 +11,7 @@ int create_recipes_table(QSqlDatabase *db);
 
 QStringList scan_recipes_folder();
 
-int insert_recipe_in_db(QString title, QString img_path, QString file_path, QString category, QSqlDatabase *db);
+int insert_recipe_in_db(QString title, QString img_path, QString json_path, QString html_path, QString category, QSqlDatabase *db);
 
 int update_database(QSqlDatabase *db);
 

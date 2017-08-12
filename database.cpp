@@ -1,18 +1,22 @@
 #include <database.h>
 #include <iostream>
-
+#include <fstream>
+#include <json.hpp>
 #include <glob.h>
 #include <qstringlist.h>
 #include <QtSql>
 #include <QFileInfo>
 #include <mainwindow.h>
 
+using json = nlohmann::json;
+
 int db_ops::create_recipes_table(QSqlDatabase *db)
 {
     QString sql = "CREATE TABLE RECIPES("  \
                 "TITLE TEXT PRIMARY KEY      NOT NULL," \
                 "IMG_PATH            TEXT    NOT NULL," \
-                "FILE_PATH           TEXT    NOT NULL," \
+                "JSON_PATH           TEXT    NOT NULL," \
+                "HTML_PATH           TEXT    NOT NULL," \
                 "CATEGORY            TEXT    NOT NULL);";
 
     db->open();
@@ -30,7 +34,7 @@ int db_ops::create_recipes_table(QSqlDatabase *db)
 
 QStringList db_ops::scan_recipes_folder()
 {
-    const std::string& pattern = "*/*.md";
+    const std::string& pattern = "json/*.json";
     glob_t glob_result;
     glob(pattern.c_str(),GLOB_TILDE,NULL,&glob_result);
     QStringList recipesList;
@@ -41,14 +45,15 @@ QStringList db_ops::scan_recipes_folder()
     return recipesList;
 }
 
-int db_ops::insert_recipe_in_db(QString title, QString img_path, QString file_path, QString category, QSqlDatabase *db)
+int db_ops::insert_recipe_in_db(QString title, QString img_path, QString json_path, QString html_path, QString category, QSqlDatabase *db)
 {
     db->open();
     QSqlQuery query;
-    query.prepare("INSERT into RECIPES (TITLE, IMG_PATH, FILE_PATH, CATEGORY) VALUES (:title, :img_path, :file_path, :category)");
+    query.prepare("INSERT into RECIPES (TITLE, IMG_PATH, JSON_PATH, HTML_PATH, CATEGORY) VALUES (:title, :img_path, :json_path, :html_path, :category)");
     query.bindValue(":title", title);
     query.bindValue(":img_path", img_path);
-    query.bindValue(":file_path", file_path);
+    query.bindValue(":json_path", json_path);
+    query.bindValue(":html_path", html_path);
     query.bindValue(":category", category);
     bool result = query.exec();
     db->close();
@@ -70,10 +75,17 @@ int db_ops::update_database(QSqlDatabase *db)
     QStringList recipe_list = scan_recipes_folder();
     std::cout << "[INFO] Updating recipe database..." << std::endl;
     foreach(QString path, recipe_list){
-        QString file_path = path;
-        QString title = path.split('/')[1].replace(".md", "");
-        QString img_path = "Images/" + path.split('/')[1].replace(" ", "_").replace(".md", ".jpg");
-        QString category = path.split('/')[0];
+        // Read file in and parse json
+        json j;
+        std::ifstream json_file(path.toStdString());
+        json_file >> j;
+        json_file.close();
+
+        QString json_path = path;
+        QString title = QString::fromStdString(j["name"].get<std::string>());
+        QString img_path = "Images/" + QString::fromStdString(j["image"].get<std::string>());
+        QString category = QString::fromStdString(j["category"].get<std::string>());
+        QString html_path = path.replace("json", "html");
 
         db->open();
         QSqlQuery query = QSqlQuery();
@@ -85,7 +97,7 @@ int db_ops::update_database(QSqlDatabase *db)
         if(query.next()){
             std::cout << "[INFO] Record already exists for " << title.toStdString() << std::endl;
         }else{
-            int insert = insert_recipe_in_db(title, img_path, file_path, category, db);
+            int insert = insert_recipe_in_db(title, img_path, json_path, html_path, category, db);
             if(insert){
                 std::cerr << "[ERROR] Unable to add recipe to database: " << title.toStdString() << std::endl;
             }else{

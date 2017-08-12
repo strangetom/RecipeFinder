@@ -8,28 +8,26 @@ The are a number of aims of this project.
 * Gain familiarity with using databases to store and retrieve information.
 
 The fuzzy search is implemented using ```lib_fts``` from [forrestthewoods](https://github.com/forrestthewoods/lib_fts) on Github.
+The json parsing is implemeted using ```json.hpp``` from [nlohmann](https://github.com/nlohmann/json) on Github.
+
 
 ### Installation
 1. Download the latest version from the [releases](https://github.com/strangetom/RecipeFinder/releases) page
 2. Mark as executable ```chmod +x RecipeFinder```
 3. On first run, the database will need creating. From the Options menu, choose _update database_.
 
-Note that the program requires Qt 5.8 to run. 
+Note that the program requires Qt 5.9 to run. 
 This program also assumes the following folder structure:
 ```
 .
 RecipeFinder
 recipes.db
-├── Beef/
-├── Chicken/
-├── Dessert/
-├── Images/
-├── Lamb/
-├── Pork/
-├── Seafood/
-└── Veggie/
+├── json/
+├── html/
+├── images/
 ```
-The ```Images/``` folder must exist. The recipes reside in the other folders as \*.md files. These folder names can change.
+The ```images/``` folder must exist. 
+The json and html files must have the same names. The json is used to populate the database and the html is used to display the recipes when they are selected.  
 
 ### Demo
 
