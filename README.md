@@ -10,6 +10,10 @@ The are a number of aims of this project.
 The fuzzy search is implemented using ```lib_fts``` from [forrestthewoods](https://github.com/forrestthewoods/lib_fts) on Github.
 The json parsing is implemeted using ```json.hpp``` from [nlohmann](https://github.com/nlohmann/json) on Github.
 
+### Demo
+
+![](./recipefinder.gif)
+
 
 ### Installation
 1. Download the latest version from the [releases](https://github.com/strangetom/RecipeFinder/releases) page
@@ -29,11 +33,29 @@ recipes.db
 The ```images/``` folder must exist. 
 The json and html files must have the same names. The json is used to populate the database and the html is used to display the recipes when they are selected.  
 
-### Demo
-
-![](./recipefinder.gif)
-
-
+## Recipe format
+The recipes are stored as json files in the json folder. The json has the following structure
+```json
+{
+  "category":  ,
+  "cookTime":  ,
+  "description":  ,
+  "image":  ,
+  "ingredients": [
+    "..."
+  ],
+  "instructions": [
+    "..."
+  ],
+  "name":  ,
+  "prepTime":  ,
+  "source":  ,
+  "totalTime":  ,
+  "url":  ,
+  "yeild":
+}
+```
+This is loosely based on Google's [recipe markup](https://developers.google.com/search/docs/data-types/recipes).
 
 ## To do
 
