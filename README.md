@@ -28,7 +28,7 @@ RecipeFinder
 recipes.db
 ├── json/
 ├── html/
-├── Images/
+├── images/
 ```
 The ```images/``` folder must exist. 
 The json and html files must have the same names. The json is used to populate the database and the html is used to display the recipes when they are selected.  

@@ -83,7 +83,7 @@ int db_ops::update_database(QSqlDatabase *db)
 
         QString json_path = path;
         QString title = QString::fromStdString(j["name"].get<std::string>());
-        QString img_path = "Images/" + QString::fromStdString(j["image"].get<std::string>());
+        QString img_path = "images/" + QString::fromStdString(j["image"].get<std::string>());
         QString category = QString::fromStdString(j["category"].get<std::string>());
         QString html_path = path.replace("json", "html");
 
