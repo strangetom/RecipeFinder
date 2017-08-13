@@ -65,7 +65,6 @@ private:
     QListWidget *recipeList;
     QComboBox *recipeBox;
     QLabel *numResults;
-    QWebEngineView *webView;
 };
 
 #endif
