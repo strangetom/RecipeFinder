@@ -8,7 +8,6 @@
 #include <QListWidget>
 #include <QComboBox>
 #include <QtSql>
-#include <QtWebEngineWidgets/QWebEngineView>
 #include <map>
 
 class QLabel;

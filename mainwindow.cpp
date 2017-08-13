@@ -1,5 +1,4 @@
 #include <QtWidgets>
-#include <QtWebEngineWidgets/QWebEngineView>
 #include "mainwindow.h"
 #include <fts_fuzzy_match.h>
 #include <glob.h>
@@ -21,10 +20,6 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     recipeBox->addItems(recipeCategories);
     createRecipeList();
     numResults = new QLabel();
-
-    //webView = new QWebEngineView();
-    //webView->load(QUrl("file:///home/tom/Recipes/html/5-a-day couscous.html"));
-    //webView->show();
 
     // Set layout
     centralWidget = new QWidget();
