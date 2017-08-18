@@ -180,7 +180,7 @@ QList<QListWidgetItem*> Window::getMatchingRecipes(QString searchText){
             recipe->setIcon(QPixmap::fromImage(*img));
         }else{
             // If image doesn't exist, use placeholder image
-            bool loaded = img->load("./Images/Placeholder.jpg");
+            bool loaded = img->load("./images/Placeholder.jpg");
             if (loaded){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
