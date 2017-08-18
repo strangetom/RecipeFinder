@@ -250,15 +250,17 @@ void Window::openFile(QListWidgetItem *recipe)
 }
 
 void Window::updateDatabase(){
-    db_ops::update_database(&db);
-    searchBox->setPlaceholderText("Search for recipes - Updated!");
+    int num_updates = db_ops::update_database(&db);
+    QString updated_text = QString("Search for recipes - Added %1 recipes!").arg(num_updates);
+    searchBox->setPlaceholderText(updated_text);
     // Repopulate list
     updateRecipesDiplay("");
 }
 
 void Window::cleanDatabase(){
-    db_ops::clean_database(&db);
-    searchBox->setPlaceholderText("Search for recipes - Cleaned!");
+    int num_removals = db_ops::clean_database(&db);
+    QString cleaned_text = QString("Search for recipes - Removed %1 recipes!").arg(num_removals);
+    searchBox->setPlaceholderText(cleaned_text);
 }
 
 void Window::resizeEvent(QResizeEvent *event){

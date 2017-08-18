@@ -71,6 +71,7 @@ int db_ops::update_database(QSqlDatabase *db)
     if(dbfile.size() < 1){
         create_recipes_table(db);
     }
+    int num_inserts = 0;
 
     QStringList recipe_list = scan_recipes_folder();
     std::cout << "[INFO] Updating recipe database..." << std::endl;
@@ -101,21 +102,24 @@ int db_ops::update_database(QSqlDatabase *db)
             if(insert){
                 std::cerr << "[ERROR] Unable to add recipe to database: " << title.toStdString() << std::endl;
             }else{
+                num_inserts++;
                 std::cout << "[INFO] Added record for " << title.toStdString() << std::endl;
             }
         }
 
     }
     db->close();
-    return 0;
+    return num_inserts;
 }
 
 int db_ops::clean_database(QSqlDatabase *db)
 {
     std::cout << "[INFO] Cleaning recipe database..." << std::endl;
+    int num_removals = 0;
     db->open();
     QSqlQuery query;
     query.exec("SELECT JSON_PATH from RECIPES");
+
 
     while(query.next())
     {
@@ -128,9 +132,10 @@ int db_ops::clean_database(QSqlDatabase *db)
             del.bindValue(":json_path", json_path);
             del.exec();
             std::cout << "[INFO] " << json_path.toStdString() << " --> REMOVED" << std::endl;
+            num_removals++;
         }
     }
     db->close();
     std::cout << "[INFO] Finished cleaning database." << std::endl;
-    return 0;
+    return num_removals;
 }
