@@ -261,6 +261,8 @@ void Window::cleanDatabase(){
     int num_removals = db_ops::clean_database(&db);
     QString cleaned_text = QString("Search for recipes - Removed %1 recipes!").arg(num_removals);
     searchBox->setPlaceholderText(cleaned_text);
+    // Repopulate list
+    updateRecipesDiplay("");
 }
 
 void Window::resizeEvent(QResizeEvent *event){
