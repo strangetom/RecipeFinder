@@ -7,8 +7,6 @@
 #include <QFileInfo>
 #include <mainwindow.h>
 
-using json = nlohmann::json;
-
 int db_ops::create_recipes_table(QSqlDatabase *db)
 {
     QString sql = "CREATE TABLE RECIPES("  \
