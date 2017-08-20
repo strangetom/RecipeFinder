@@ -17,7 +17,6 @@ SOURCES += main.cpp\
 
 HEADERS  += mainwindow.h \
     fts_fuzzy_match.h \
-    database.h \
-    json.hpp
+    database.h
 
 FORMS    +=

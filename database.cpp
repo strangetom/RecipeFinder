@@ -1,7 +1,6 @@
 #include <database.h>
 #include <iostream>
 #include <fstream>
-#include <json.hpp>
 #include <glob.h>
 #include <qstringlist.h>
 #include <QtSql>
@@ -77,17 +76,20 @@ int db_ops::update_database(QSqlDatabase *db)
     std::cout << "[INFO] Updating recipe database..." << std::endl;
     foreach(QString path, recipe_list){
         // Read file in and parse json
-        json j;
-        std::ifstream json_file(path.toStdString());
-        json_file >> j;
+        QFile json_file;
+        json_file.setFileName(path);
+        json_file.open(QIODevice::ReadOnly | QIODevice::Text);
+        QJsonObject j = QJsonDocument::fromJson(json_file.readAll()).object();
         json_file.close();
 
+        // Extract data from json
         QString json_path = path;
-        QString title = QString::fromStdString(j["name"].get<std::string>());
-        QString img_path = "images/" + QString::fromStdString(j["image"].get<std::string>());
-        QString category = QString::fromStdString(j["category"].get<std::string>());
+        QString title = j["name"].toString();
+        QString img_path = "images/" + j["image"].toString();
+        QString category = j["category"].toString();
         QString html_path = path.replace("json", "html");
 
+        // Add data to database
         db->open();
         QSqlQuery query = QSqlQuery();
         query.setForwardOnly(true);
