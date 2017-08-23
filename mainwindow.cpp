@@ -1,3 +1,4 @@
+#define FTS_FUZZY_MATCH_IMPLEMENTATION
 #include <QtWidgets>
 #include "mainwindow.h"
 #include <fts_fuzzy_match.h>
@@ -219,7 +220,7 @@ std::map<double, QStringList> Window::findMatches(QString text)
         QString file_path = query.value(2).toString();
 
         std::string titlestr = title.toStdString();
-        if (fts::fuzzy_match_score(txtstr.c_str(), titlestr.c_str(), score)){
+        if (fts::fuzzy_match(txtstr.c_str(), titlestr.c_str(), score)){
             // If a map entry already has the current score, increase score by 0.01.
             double dbscore = (double)score;
             if (matchingFiles.count(dbscore) > 0){
