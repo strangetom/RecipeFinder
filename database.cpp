@@ -57,7 +57,8 @@ int db_ops::insert_recipe_in_db(QString title, QString img_path, QString json_pa
     if(result){
         return 0;
     }else{
-        std::cerr << "[WARNING] Error inserting data for " << title.toStdString() << ": " << query.lastError().text().toStdString() << std::endl;
+        std::cerr << "[WARNING] Error inserting data for " << json_path.toStdString() << ": " << query.lastError().text().toStdString() << std::endl;
+        std::cerr << "Ensure json is properly formed." << std::endl;
         return 1;
     }
 }
