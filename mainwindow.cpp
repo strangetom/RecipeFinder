@@ -53,8 +53,8 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
     connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
 
-    // Populate list on start up
-    updateRecipesDiplay("");
+    // Update on startup
+    updateDatabase();
 }
 
 // Get list of files according to glob patternn
@@ -83,14 +83,20 @@ void SearchBox::keyPressEvent(QKeyEvent *evt){
 
 void Window::updateRecipesDiplay(QString searchText){
     recipeList->clear();
+    QList<QListWidgetItem*> recipes;
 
-    QList<QListWidgetItem*> recipes = getRecipeList(searchText);
-    for (int i=0; i<recipes.size(); ++i){
-        recipeList->addItem(recipes[i]);
-    }
-
-    if(searchText.isEmpty()){
+    if (searchText.isEmpty()) {
+        recipes = getAllRecipes();
+        for (int i=0; i<recipes.size(); ++i){
+            recipeList->addItem(recipes[i]);
+        }
         recipeList->sortItems();
+
+    }else{
+        recipes = getMatchingRecipes(searchText);
+        for (int i=0; i<recipes.size(); ++i){
+            recipeList->addItem(recipes[i]);
+        }
     }
 
     QString text = QString("%1 recipes").arg(recipes.size());
@@ -98,16 +104,6 @@ void Window::updateRecipesDiplay(QString searchText){
         text = "1 recipe";
     }
     numResults->setText(text);
-}
-
-QList<QListWidgetItem*> Window::getRecipeList(QString searchText){
-    QList<QListWidgetItem*> recipes;
-    if (searchText.isEmpty()) {
-        recipes = getAllRecipes();
-    }else{
-        recipes = getMatchingRecipes(searchText);
-    }
-    return recipes;
 }
 
 QList<QListWidgetItem*> Window::getAllRecipes(){
@@ -241,6 +237,7 @@ void Window::createRecipeList()
     recipeList->setGridSize(QSize(280, 185));
     recipeList->setWordWrap(true);
     recipeList->setTextElideMode(Qt::ElideNone);
+    recipeList->setUniformItemSizes(true);
 }
 
 void Window::openFile(QListWidgetItem *recipe)
@@ -302,5 +299,6 @@ void Window::resizeEvent(QResizeEvent *event){
 
     recipeList->setIconSize(QSize(iconWidth, iconHeight));
     recipeList->setGridSize(QSize(gridWidth, gridHeight));
+    recipeList->setUniformItemSizes(true);
 }
 

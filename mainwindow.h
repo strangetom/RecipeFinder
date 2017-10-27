@@ -48,7 +48,6 @@ private:
     void updateDatabase();
     void cleanDatabase();
 
-    QList<QListWidgetItem*> getRecipeList(QString searchText);
     QList<QListWidgetItem*> getAllRecipes();
     QList<QListWidgetItem*> getMatchingRecipes(QString searchText);
     std::map<double, QStringList> findMatches(QString text);
