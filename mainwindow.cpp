@@ -99,6 +99,8 @@ void Window::updateRecipesDiplay(QString searchText){
         }
     }
 
+    recipeList->setDragEnabled(false);
+
     QString text = QString("%1 recipes").arg(recipes.size());
     if (recipes.size() == 1){
         text = "1 recipe";
