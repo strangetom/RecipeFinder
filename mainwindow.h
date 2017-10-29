@@ -8,6 +8,7 @@
 #include <QListWidget>
 #include <QComboBox>
 #include <QtSql>
+#include <QtWebEngineWidgets>
 #include <map>
 
 class QLabel;
@@ -64,6 +65,8 @@ private:
     QListWidget *recipeList;
     QComboBox *recipeBox;
     QLabel *numResults;
+
+    QWebEngineView *recipeView;
 };
 
 #endif

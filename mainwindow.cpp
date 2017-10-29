@@ -21,14 +21,20 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     recipeBox->addItems(recipeCategories);
     createRecipeList();
     numResults = new QLabel();
+    recipeView = new QWebEngineView();
 
     // Set layout
     centralWidget = new QWidget();
-    QGridLayout *mainLayout = new QGridLayout(centralWidget);
-    mainLayout->addWidget(searchBox, 0, 0, 1, 6);
-    mainLayout->addWidget(numResults, 0, 6, 1, 1);
-    mainLayout->addWidget(recipeBox, 0, 7, 1, 1);
-    mainLayout->addWidget(recipeList, 1, 0, 1, 8);
+    QGridLayout *sidebar = new QGridLayout();
+    sidebar->addWidget(searchBox, 0, 0, 1, 2);
+    sidebar->addWidget(numResults, 1, 0, 1, 1);
+    sidebar->addWidget(recipeBox, 1, 1, 1, 1);
+    sidebar->addWidget(recipeList, 2, 0, 1, 2);
+
+    QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
+    mainLayout->addLayout(sidebar, 1);
+    mainLayout->addWidget(recipeView, 3);
+
     centralWidget->setLayout(mainLayout);
     centralWidget->show();
     setCentralWidget(centralWidget);
@@ -45,10 +51,10 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
 
     // Set window paramters
     setWindowTitle(tr("Find Recipes"));
-    setMinimumSize(600, 400);
+    setMinimumSize(940, 400);
 
     // Set signals
-    connect(recipeList, &QListWidget::itemDoubleClicked, this, &Window::openFile);
+    connect(recipeList, &QListWidget::itemClicked, this, &Window::openFile);
     connect(searchBox, SIGNAL(inputText(QString)), this, SLOT(updateRecipesDiplay(QString)));
     connect(searchBox, SIGNAL(returnPressed()), recipeList, SLOT(setFocus()));
     connect(recipeBox, SIGNAL(currentTextChanged(QString)), searchBox, SLOT(recipeFiterChanged(QString)));
@@ -235,18 +241,20 @@ void Window::createRecipeList()
 {
     recipeList = new QListWidget();
     recipeList->setViewMode(QListView::IconMode);
-    recipeList->setIconSize(QSize(267, 150));
-    recipeList->setGridSize(QSize(280, 185));
+    recipeList->setGridSize(QSize(212, int(212/1.51)) );
+    recipeList->setIconSize(QSize(199, int(199/1.78)) );
     recipeList->setWordWrap(true);
     recipeList->setTextElideMode(Qt::ElideNone);
-    recipeList->setUniformItemSizes(true);
+    recipeList->horizontalScrollBar()->setEnabled(false);
+    recipeList->horizontalScrollBar()->setVisible(false);
 }
 
 void Window::openFile(QListWidgetItem *recipe)
 {
     // Read hidden data to find full file path
     QString path = recipe->data(Qt::UserRole).toString();
-    QDesktopServices::openUrl(QUrl::fromLocalFile(currentDir.absoluteFilePath(path)));
+    QString url = "file://" + currentDir.absoluteFilePath(path);
+    recipeView->load(url);
 }
 
 void Window::updateDatabase(){
@@ -276,28 +284,17 @@ void Window::cleanDatabase(){
 }
 
 void Window::resizeEvent(QResizeEvent *event){
-    int iconWidth, iconHeight, gridWidth, gridHeight, columns;
-    double gridRatio = 280.0/185.0;
-    double iconRatio = 267.0/150.0;
+    int iconWidth, iconHeight, gridWidth, gridHeight;
+    double gridRatio = 1.51;
+    double iconRatio = 1.78;
     QSize recipeListSize = recipeList->size();
 
-    if(recipeListSize.width()<=587){
-        // Set defaults for minimum size
-        columns = 2;
-        iconWidth = 267;
-        iconHeight = 150;
-        gridWidth = 280;
-        gridHeight = 185;
-    }else{
-        // Icons should never go larger than default, so set number of columns to round up
-        columns = ceil(recipeListSize.width()/280.0);
-        // Width of grid is widget_width/columns, with extra width removed to allow for scrollbar
-        gridWidth = int(recipeListSize.width()/columns) - ceil(18.0/columns);
-        // Calculate other parameters based on ratios of default values.
-        gridHeight = int(gridWidth/gridRatio);
-        iconWidth = gridWidth - 13;
-        iconHeight = int(iconWidth/iconRatio);
-    }
+    // Set gridwith based on recipeList size and ensure it doesn't go below minimum value
+    gridWidth = qMax(int(recipeListSize.width()) - 17.0, 212.0);
+    // Calculate other parameters based on ratios of default values.
+    gridHeight = int(gridWidth/gridRatio);
+    iconWidth = gridWidth - 13;
+    iconHeight = int(iconWidth/iconRatio);
 
     recipeList->setIconSize(QSize(iconWidth, iconHeight));
     recipeList->setGridSize(QSize(gridWidth, gridHeight));
