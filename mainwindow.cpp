@@ -260,10 +260,10 @@ void Window::openFile(QListWidgetItem *recipe)
 void Window::updateDatabase(){
     int num_updates = db_ops::update_database(&db);
     QString updated_text;
-    if (num_updates == 1){
-        updated_text = QString("Search for recipes - Added 1 recipe!");
+    if (num_updates == 0){
+        updated_text = QString("Search for recipes");
     }else{
-        updated_text = QString("Search for recipes - Added %1 recipes!").arg(num_updates);
+        updated_text = QString("Search for recipes - Updated!").arg(num_updates);
     }
     searchBox->setPlaceholderText(updated_text);
     // Repopulate list
