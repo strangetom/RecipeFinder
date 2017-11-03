@@ -22,7 +22,6 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     createRecipeList();
     numResults = new QLabel();
     recipeView = new QWebEngineView();
-    recipeView->settings()->setAttribute(QWebEngineSettings::JavascriptEnabled, false);
 
     // Set layout
     centralWidget = new QWidget();
