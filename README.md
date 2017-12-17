@@ -8,7 +8,6 @@ The are a number of aims of this project.
 * Gain familiarity with using databases to store and retrieve information.
 
 The fuzzy search is implemented using ```lib_fts``` from [forrestthewoods](https://github.com/forrestthewoods/lib_fts) on Github.
-The json parsing is implemeted using ```json.hpp``` from [nlohmann](https://github.com/nlohmann/json) on Github.
 
 ### Demo
 
@@ -20,7 +19,7 @@ The json parsing is implemeted using ```json.hpp``` from [nlohmann](https://gith
 2. Mark as executable ```chmod +x RecipeFinder```
 3. On first run, the database will need creating. From the Options menu, choose _update database_.
 
-Note that the program requires Qt 5.9 to run. 
+Note that the program was developed using Qt 5.10, but may build with older versions (> 5). 
 This program also assumes the following folder structure:
 ```
 .
@@ -56,7 +55,3 @@ The recipes are stored as json files in the json folder. The json has the follow
 }
 ```
 This is loosely based on Google's [recipe markup](https://developers.google.com/search/docs/data-types/recipes).
-
-## To do
-
--   Give user feedback about database update and clean options.
