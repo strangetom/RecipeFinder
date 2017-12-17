@@ -15,6 +15,7 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     // Initialise widgets
     searchBox = new SearchBox();
     searchBox->setPlaceholderText("Search for recipes");
+    searchBox->setClearButtonEnabled(true);
     recipeBox = new QComboBox();
     QStringList recipeCategories;
     recipeCategories << "All Recipes" << "Beef" << "Chicken" << "Dessert" << "Lamb" << "Pork" << "Seafood" << "Turkey" << "Veggie";
