@@ -124,11 +124,11 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
         QString category = recipeBox->currentText();
-        query.prepare("select TITLE, IMG_PATH, HTML_PATH from RECIPES where CATEGORY = :category");
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
     }else{
-        query.prepare("select TITLE, IMG_PATH, HTML_PATH from RECIPES");
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES");
         query.setForwardOnly(true);
     }
     // Execute query
@@ -136,9 +136,9 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
 
     while(query.next()){
         // Extract info from query results
-        QString title = query.value(0).toString();
-        QString img_path = query.value(1).toString();
-        QString html_path = query.value(2).toString();
+        QString title = query.value("TITLE").toString();
+        QString img_path = query.value("IMG_PATH").toString();
+        QString html_path = query.value("HTML_PATH").toString();
 
         // Create QListWidgetItems
         QListWidgetItem *recipe = new QListWidgetItem;
@@ -205,11 +205,11 @@ std::map<double, QStringList> Window::findMatches(QString text)
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
         QString category = recipeBox->currentText();
-        query.prepare("select TITLE, IMG_PATH, HTML_PATH from RECIPES where CATEGORY = :category");
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
     }else{
-        query.prepare("select TITLE, IMG_PATH, HTML_PATH from RECIPES");
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES");
         query.setForwardOnly(true);
     }
     // Execute query
@@ -220,9 +220,9 @@ std::map<double, QStringList> Window::findMatches(QString text)
     std::string txtstr = text.toStdString();
     while(query.next()){
         int score;
-        QString title = query.value(0).toString();
-        QString img_path = query.value(1).toString().replace("\'", "").replace(",", "");
-        QString file_path = query.value(2).toString();
+        QString title = query.value("TITLE").toString();
+        QString img_path = query.value("IMG_PATH").toString().replace("\'", "").replace(",", "");
+        QString file_path = query.value("HTML_PATH").toString();
 
         std::string titlestr = title.toStdString();
         if (fts::fuzzy_match(txtstr.c_str(), titlestr.c_str(), score)){
