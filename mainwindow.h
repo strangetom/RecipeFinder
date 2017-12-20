@@ -45,7 +45,8 @@ private slots:
 
 private:
     void resizeEvent(QResizeEvent *event);
-    void createRecipeList();
+    void populateRecipeBox(QComboBox*);
+    void createRecipeListWidget();
     void updateDatabase();
     void cleanDatabase();
 

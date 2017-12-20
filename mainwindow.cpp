@@ -17,10 +17,8 @@ Window::Window(QWidget *parent) : QMainWindow(parent)
     searchBox->setPlaceholderText("Search for recipes");
     searchBox->setClearButtonEnabled(true);
     recipeBox = new QComboBox();
-    QStringList recipeCategories;
-    recipeCategories << "All Recipes" << "Beef" << "Chicken" << "Dessert" << "Lamb" << "Pork" << "Seafood" << "Turkey" << "Veggie";
-    recipeBox->addItems(recipeCategories);
-    createRecipeList();
+    populateRecipeBox(recipeBox);
+    createRecipeListWidget();
     numResults = new QLabel();
     recipeView = new QWebEngineView();
 
@@ -86,6 +84,22 @@ void SearchBox::keyPressEvent(QKeyEvent *evt){
     setPlaceholderText("Search for recipes");
     // When the search changes, emit this signal to call updateRecipeDisplay
     emit inputText(text());
+}
+
+void Window::populateRecipeBox(QComboBox* box){
+    // Open database
+    db.open();
+    // Prepare query
+    QSqlQuery query = QSqlQuery();
+    query.prepare("SELECT CATEGORY, COUNT(*) FROM RECIPES GROUP BY CATEGORY ORDER BY CATEGORY");
+    query.setForwardOnly(true);
+    query.exec();
+
+    box->addItem("All Recipes");
+    while(query.next()){
+        box->addItem(query.value("CATEGORY").toString());
+    }
+    db.close();
 }
 
 void Window::updateRecipesDiplay(QString searchText){
@@ -238,7 +252,7 @@ std::map<double, QStringList> Window::findMatches(QString text)
     return matchingFiles;
 }
 
-void Window::createRecipeList()
+void Window::createRecipeListWidget()
 {
     recipeList = new QListWidget();
     recipeList->setViewMode(QListView::IconMode);
