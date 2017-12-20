@@ -277,9 +277,9 @@ void Window::updateDatabase(){
     int num_updates = db_ops::update_database(&db);
     QString updated_text;
     if (num_updates == 0){
-        updated_text = QString("Search for recipes");
+        updated_text = "Search for recipes";
     }else{
-        updated_text = QString("Search for recipes - Updated!").arg(num_updates);
+        updated_text = "Search for recipes - Updated!";
     }
     searchBox->setPlaceholderText(updated_text);
     // Repopulate list
