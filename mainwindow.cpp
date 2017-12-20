@@ -75,6 +75,7 @@ QStringList globVector(const std::string& pattern){
 }
 
 void SearchBox::recipeFiterChanged(QString newFilter){
+    Q_UNUSED(newFilter);
     // When the recipe filter changes, emit this signal to call updateRecipeDisplay
     emit inputText(text());
 }
@@ -299,6 +300,7 @@ void Window::cleanDatabase(){
 }
 
 void Window::resizeEvent(QResizeEvent *event){
+    Q_UNUSED(event);
     int iconWidth, iconHeight, gridWidth, gridHeight;
     double gridRatio = 1.51;
     double iconRatio = 1.78;
