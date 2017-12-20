@@ -98,7 +98,8 @@ void Window::populateRecipeBox(QComboBox* box){
 
     box->addItem("All Recipes");
     while(query.next()){
-        box->addItem(query.value("CATEGORY").toString());
+        QString entry = query.value("CATEGORY").toString() + " [" + query.value(1).toString() + "]";
+        box->addItem(entry);
     }
     db.close();
 }
@@ -138,7 +139,7 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
     // Prepare query based on filter
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
-        QString category = recipeBox->currentText();
+        QString category = recipeBox->currentText().split(" [")[0];
         query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
@@ -219,7 +220,7 @@ std::map<double, QStringList> Window::findMatches(QString text)
     // Prepare query based on filter
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
-        QString category = recipeBox->currentText();
+        QString category = recipeBox->currentText().split(" [")[0];
         query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
