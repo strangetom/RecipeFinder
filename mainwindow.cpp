@@ -151,13 +151,11 @@ void Window::getAllRecipes(){
         recipe->setData(Qt::UserRole, html_path);
 
         QImage *img = new QImage();
-        bool loaded = img->load(img_path);
-        if (loaded){
+        if (img->load(img_path)){
             recipe->setIcon(QPixmap::fromImage(*img));
         }else{
             // If image doesn't exist, use placeholder image
-            bool loaded = img->load("./images/Placeholder.jpg");
-            if (loaded){
+            if (img->load("./images/Placeholder.jpg")){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
         }
@@ -183,13 +181,11 @@ void Window::getMatchingRecipes(QString searchText){
         recipe->setData(Qt::UserRole, html_path);
 
         QImage *img = new QImage();
-        bool loaded = img->load(img_path);
-        if (loaded){
+        if (img->load(img_path)){
             recipe->setIcon(QPixmap::fromImage(*img));
         }else{
             // If image doesn't exist, use placeholder image
-            bool loaded = img->load("./images/Placeholder.jpg");
-            if (loaded){
+            if (img->load("./images/Placeholder.jpg")){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
         }
