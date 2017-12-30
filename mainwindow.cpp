@@ -127,17 +127,18 @@ void Window::getAllRecipes(){
     db.open();
     // Prepare query based on filter
     QSqlQuery query = QSqlQuery();
-    if(recipeBox->currentText() != "All Recipes"){
+    if(recipeBox->currentText() == "All Recipes"){
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES ORDER BY TITLE");
+        query.setForwardOnly(true);
+    }else{
         QString category = recipeBox->currentText().split(" [")[0];
         query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category ORDER BY TITLE");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
-    }else{
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES ORDER BY TITLE");
-        query.setForwardOnly(true);
     }
     // Execute query
     query.exec();
+
 
     while(query.next()){
         // Extract info from query results
@@ -150,6 +151,7 @@ void Window::getAllRecipes(){
         recipe->setText(title);
         recipe->setData(Qt::UserRole, html_path);
 
+
         QImage *img = new QImage();
         if (img->load(img_path)){
             recipe->setIcon(QPixmap::fromImage(*img));
@@ -161,6 +163,7 @@ void Window::getAllRecipes(){
         }
         recipeList->addItem(recipe);
     }
+
     db.close();
 }
 
