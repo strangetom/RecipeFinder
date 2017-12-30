@@ -106,45 +106,34 @@ void Window::populateRecipeBox(QComboBox* box){
 
 void Window::updateRecipesDiplay(QString searchText){
     recipeList->clear();
-    QList<QListWidgetItem*> recipes;
 
     if (searchText.isEmpty()) {
-        recipes = getAllRecipes();
-        for (int i=0; i<recipes.size(); ++i){
-            recipeList->addItem(recipes[i]);
-        }
-        recipeList->sortItems();
-
+        getAllRecipes();
     }else{
-        recipes = getMatchingRecipes(searchText);
-        for (int i=0; i<recipes.size(); ++i){
-            recipeList->addItem(recipes[i]);
-        }
+        getMatchingRecipes(searchText);
     }
 
     recipeList->setDragEnabled(false);
 
-    QString text = QString("%1 recipes").arg(recipes.size());
-    if (recipes.size() == 1){
+    QString text = QString("%1 recipes").arg(recipeList->count());
+    if (recipeList->count() == 1){
         text = "1 recipe";
     }
     numResults->setText(text);
 }
 
-QList<QListWidgetItem*> Window::getAllRecipes(){
-    QList<QListWidgetItem*> recipes;
-
+void Window::getAllRecipes(){
     // Open database and execute query
     db.open();
     // Prepare query based on filter
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
         QString category = recipeBox->currentText().split(" [")[0];
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category");
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category ORDER BY TITLE");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
     }else{
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES");
+        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES ORDER BY TITLE");
         query.setForwardOnly(true);
     }
     // Execute query
@@ -172,16 +161,13 @@ QList<QListWidgetItem*> Window::getAllRecipes(){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
         }
-        recipes.append(recipe);
+        recipeList->addItem(recipe);
     }
     db.close();
-    return recipes;
 }
 
 
-QList<QListWidgetItem*> Window::getMatchingRecipes(QString searchText){
-    QList<QListWidgetItem*> recipes;
-
+void Window::getMatchingRecipes(QString searchText){
     // Get matching recipes and their scores. The QStringList contains title, img_path, file_path in order.
     std::map<double, QStringList> matchingRecipes = findMatches(searchText);
     // Build QListWidgetItems and add to QList
@@ -207,10 +193,8 @@ QList<QListWidgetItem*> Window::getMatchingRecipes(QString searchText){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
         }
-        recipes.append(recipe);
+        recipeList->addItem(recipe);
     }
-
-    return recipes;
 }
 
 std::map<double, QStringList> Window::findMatches(QString text)

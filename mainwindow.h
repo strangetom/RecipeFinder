@@ -50,8 +50,8 @@ private:
     void updateDatabase();
     void cleanDatabase();
 
-    QList<QListWidgetItem*> getAllRecipes();
-    QList<QListWidgetItem*> getMatchingRecipes(QString searchText);
+    void getAllRecipes();
+    void getMatchingRecipes(QString searchText);
     std::map<double, QStringList> findMatches(QString text);
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
