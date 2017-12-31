@@ -10,11 +10,11 @@
 int db_ops::create_recipes_table(QSqlDatabase *db)
 {
     QString sql = "CREATE TABLE RECIPES("  \
-                "TITLE TEXT PRIMARY KEY      NOT NULL," \
-                "IMG_PATH            TEXT    NOT NULL," \
-                "JSON_PATH           TEXT    NOT NULL," \
-                "HTML_PATH           TEXT    NOT NULL," \
-                "CATEGORY            TEXT    NOT NULL);";
+                "title TEXT PRIMARY KEY      NOT NULL," \
+                "thumbnail           TEXT    NOT NULL," \
+                "json_path           TEXT    NOT NULL," \
+                "html_path           TEXT    NOT NULL," \
+                "category            TEXT    NOT NULL);";
 
     db->open();
     QSqlQuery query;
@@ -46,7 +46,7 @@ int db_ops::insert_recipe_in_db(QString title, QString img_path, QString json_pa
 {
     db->open();
     QSqlQuery query;
-    query.prepare("INSERT into RECIPES (TITLE, IMG_PATH, JSON_PATH, HTML_PATH, CATEGORY) VALUES (:title, :img_path, :json_path, :html_path, :category)");
+    query.prepare("INSERT into RECIPES (title, thumbnail, json_path, html_path, category) VALUES (:title, :img_path, :json_path, :html_path, :category)");
     query.bindValue(":title", title);
     query.bindValue(":img_path", img_path);
     query.bindValue(":json_path", json_path);
@@ -84,7 +84,7 @@ int db_ops::update_database(QSqlDatabase *db)
         // Extract data from json
         QString json_path = path;
         QString title = j["name"].toString();
-        QString img_path = "images/" + j["image"].toString();
+        QString img_path = "thumbnails/" + j["image"].toString();
         QString category = j["category"].toString();
         QString html_path = path.replace("json", "html");
 
@@ -129,7 +129,7 @@ int db_ops::clean_database(QSqlDatabase *db)
         if(!file.exists())
         {
             QSqlQuery del = QSqlQuery();
-            del.prepare("DELETE from RECIPES where JSON_PATH = :json_path");
+            del.prepare("DELETE FROM RECIPES WHERE json_path = :json_path");
             del.bindValue(":json_path", json_path);
             del.exec();
             std::cout << "[INFO] " << json_path.toStdString() << " --> REMOVED" << std::endl;

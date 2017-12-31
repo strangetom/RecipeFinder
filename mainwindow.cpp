@@ -92,13 +92,13 @@ void Window::populateRecipeBox(QComboBox* box){
     db.open();
     // Prepare query
     QSqlQuery query = QSqlQuery();
-    query.prepare("SELECT CATEGORY, COUNT(*) FROM RECIPES GROUP BY CATEGORY ORDER BY CATEGORY");
+    query.prepare("SELECT category, COUNT(*) FROM RECIPES GROUP BY category ORDER BY category");
     query.setForwardOnly(true);
     query.exec();
 
     box->addItem("All Recipes");
     while(query.next()){
-        QString entry = query.value("CATEGORY").toString() + " [" + query.value(1).toString() + "]";
+        QString entry = query.value("category").toString() + " [" + query.value(1).toString() + "]";
         box->addItem(entry);
     }
     db.close();
@@ -128,11 +128,11 @@ void Window::getAllRecipes(){
     // Prepare query based on filter
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() == "All Recipes"){
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES ORDER BY TITLE");
+        query.prepare("SELECT title, thumbnail, html_path FROM RECIPES ORDER BY title");
         query.setForwardOnly(true);
     }else{
         QString category = recipeBox->currentText().split(" [")[0];
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category ORDER BY TITLE");
+        query.prepare("SELECT title, thumbnail, html_path FROM RECIPES WHERE category = :category ORDER BY title");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
     }
@@ -142,9 +142,9 @@ void Window::getAllRecipes(){
 
     while(query.next()){
         // Extract info from query results
-        QString title = query.value("TITLE").toString();
-        QString img_path = query.value("IMG_PATH").toString();
-        QString html_path = query.value("HTML_PATH").toString();
+        QString title = query.value("title").toString();
+        QString img_path = query.value("thumbnail").toString();
+        QString html_path = query.value("html_path").toString();
 
         // Create QListWidgetItems
         QListWidgetItem *recipe = new QListWidgetItem;
@@ -163,7 +163,6 @@ void Window::getAllRecipes(){
         }
         recipeList->addItem(recipe);
     }
-
     db.close();
 }
 
@@ -204,11 +203,11 @@ std::map<double, QStringList> Window::findMatches(QString text)
     QSqlQuery query = QSqlQuery();
     if(recipeBox->currentText() != "All Recipes"){
         QString category = recipeBox->currentText().split(" [")[0];
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES WHERE CATEGORY = :category");
+        query.prepare("SELECT title, thumbnail, html_path FROM RECIPES WHERE category = :category");
         query.bindValue(":category", category);
         query.setForwardOnly(true);
     }else{
-        query.prepare("SELECT TITLE, IMG_PATH, HTML_PATH FROM RECIPES");
+        query.prepare("SELECT title, thumbnail, html_path FROM RECIPES");
         query.setForwardOnly(true);
     }
     // Execute query
@@ -219,9 +218,9 @@ std::map<double, QStringList> Window::findMatches(QString text)
     std::string txtstr = text.toStdString();
     while(query.next()){
         int score;
-        QString title = query.value("TITLE").toString();
-        QString img_path = query.value("IMG_PATH").toString().replace("\'", "").replace(",", "");
-        QString file_path = query.value("HTML_PATH").toString();
+        QString title = query.value("title").toString();
+        QString img_path = query.value("thumbnail").toString().replace("\'", "").replace(",", "");
+        QString file_path = query.value("html_path").toString();
 
         std::string titlestr = title.toStdString();
         if (fts::fuzzy_match(txtstr.c_str(), titlestr.c_str(), score)){
