@@ -157,7 +157,7 @@ void Window::getAllRecipes(){
             recipe->setIcon(QPixmap::fromImage(*img));
         }else{
             // If image doesn't exist, use placeholder image
-            if (img->load("./images/Placeholder.jpg")){
+            if (img->load("./thumbnails/Placeholder.jpg")){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
         }
@@ -187,7 +187,7 @@ void Window::getMatchingRecipes(QString searchText){
             recipe->setIcon(QPixmap::fromImage(*img));
         }else{
             // If image doesn't exist, use placeholder image
-            if (img->load("./images/Placeholder.jpg")){
+            if (img->load("./thumbnails/Placeholder.jpg")){
                 recipe->setIcon(QPixmap::fromImage(*img));
             }
         }
