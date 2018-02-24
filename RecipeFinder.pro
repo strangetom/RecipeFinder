@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui sql
+QMAKE_LFLAGS += -no-pie # so ubuntu doesn't see it as a shared library
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets webenginewidgets
 

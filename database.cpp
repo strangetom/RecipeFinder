@@ -86,7 +86,7 @@ int db_ops::update_database(QSqlDatabase *db)
         QString title = j["name"].toString();
         QString img_path = "thumbnails/" + j["image"].toString();
         QString category = j["category"].toString();
-        QString html_path = path.replace("json", "html");
+        QString html_path = "website/recipes/" + j["image"].toString().replace("_", " ").replace("jpg", "html");
 
         // Add data to database
         db->open();
